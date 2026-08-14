@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Lembrete")
+@Table(name = "lembrete")
 @Getter
 @Setter
 public class Lembrete {

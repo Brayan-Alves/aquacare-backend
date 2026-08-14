@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "Animal_Aquario")
+@Table(name = "animal_aquario")
 @Getter
 @Setter
 public class AnimalAquario {
@@ -14,11 +14,11 @@ public class AnimalAquario {
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "id_animal")
+    @JoinColumn(name = "id_animal", nullable = false)
     private Animal animal;
 
     @ManyToOne
-    @JoinColumn(name = "id_aquario")
+    @JoinColumn(name = "id_aquario", nullable = false)
     private Aquario aquario;
 
     @Column(nullable = false)

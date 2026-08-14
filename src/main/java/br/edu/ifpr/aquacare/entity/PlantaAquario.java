@@ -14,14 +14,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Planta_Aquario")
+@Table(name = "planta_aquario")
 @Getter
 @Setter
 public class PlantaAquario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
     private int id;
 
     @ManyToOne

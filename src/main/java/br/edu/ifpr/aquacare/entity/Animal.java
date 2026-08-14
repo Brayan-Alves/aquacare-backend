@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "Animal")
+@Table(name = "animal")
 @Getter
 @Setter
 public class Animal {
@@ -36,16 +36,16 @@ public class Animal {
     private float phMax;
 
     @Column(nullable = true)
-    private float ghMin;
+    private Float ghMin;
 
     @Column(nullable = true)
-    private float ghMax;
+    private Float ghMax;
 
     @Column(nullable = true)
-    private float salinidadeMin;
+    private Float salinidadeMin;
 
     @Column(nullable = true)
-    private float salinidadeMax;
+    private Float salinidadeMax;
 
     @Column(nullable = false, length = 20)
     private String agressividade;

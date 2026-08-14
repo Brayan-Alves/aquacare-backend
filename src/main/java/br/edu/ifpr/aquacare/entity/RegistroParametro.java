@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Registro_Parametro")
+@Table(name = "registro_parametro")
 @Getter
 @Setter
 public class RegistroParametro {
@@ -42,28 +42,28 @@ public class RegistroParametro {
     private float amonia;
 
     @Column(nullable = true)
-    private float nitrato;
+    private Float nitrato;
 
     @Column(nullable = true)
-    private float nitrito;
+    private Float nitrito;
 
     @Column(nullable = true)
-    private float gh;
+    private Float gh;
 
     @Column(nullable = true)
-    private float kh;
+    private Float kh;
 
     @Column(nullable = true)
-    private float co2;
+    private Float co2;
 
     @Column(nullable = true)
-    private float salinidade;
+    private Float salinidade;
 
     @Column(nullable = true)
-    private float calcio;
+    private Float calcio;
 
     @Column(nullable = true)
-    private float magnesio;
+    private Float magnesio;
 
     @PrePersist
     public void prePersist(){

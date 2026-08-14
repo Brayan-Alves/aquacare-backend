@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Equipamento")
+@Table(name = "equipamento")
 @Getter
 @Setter
 public class Equipamento {
@@ -40,11 +40,11 @@ public class Equipamento {
     private String marca;
 
     @Column(nullable = true)
-    private int potenciaWatts;
+    private Integer potenciaWatts;
 
     @Column(nullable = true)
-    private int vazaoLH;
+    private Integer vazaoLH;
 
     @Column(nullable = true)
-    private float lumens;
+    private Float lumens;
 }
