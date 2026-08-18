@@ -26,6 +26,10 @@ public class AquarioService {
         return aquarioRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aquario não encontrado."));
     }
 
+    public List<Aquario> listarTodos(){
+        return aquarioRepository.findAll();
+    }
+
     public List<Aquario> listarPorUsuario(String idUsuario){
         return aquarioRepository.findByUsuarioId(idUsuario);
     }

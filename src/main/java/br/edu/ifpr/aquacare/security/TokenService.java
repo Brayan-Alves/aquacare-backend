@@ -18,10 +18,18 @@ public class TokenService {
     @Value("${jwt.expiration}")
     private long expiration;
 
+    private SecretKey getKey(){
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
     public String gerarToken(String email){
-        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        SecretKey key = getKey();
 
         return Jwts.builder().subject(email).issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + expiration)).signWith(key).compact();
 
+    }
+
+    public String extrairEmail(String token){
+        return Jwts.parser().verifyWith(getKey()).build().parseSignedClaims(token).getPayload().getSubject(); 
     }
 }
