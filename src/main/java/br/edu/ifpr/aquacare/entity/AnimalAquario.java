@@ -26,4 +26,9 @@ public class AnimalAquario {
 
     @Column(nullable = false)
     private LocalDate dataAdicao;
+
+    @PrePersist
+    public void prePersist(){
+        this.dataAdicao = LocalDate.now();
+    }
 }

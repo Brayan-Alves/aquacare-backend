@@ -29,4 +29,28 @@ public class EquipamentoService {
         return equipamentoRepository.findAll();
     }
 
+    public List<Equipamento> listarPorAquarios(int idAquario){
+        return equipamentoRepository.findByAquarioId(idAquario);
+    }
+
+    public Equipamento atualizar(int id, Equipamento dadosAtualizados){
+        Equipamento equipamento = buscarPorId(id);
+
+        equipamento.setLumens(dadosAtualizados.getLumens());
+        equipamento.setMarca(dadosAtualizados.getMarca());
+        equipamento.setModelo(dadosAtualizados.getModelo());
+        equipamento.setNome(dadosAtualizados.getNome());
+        equipamento.setPotenciaWatts(dadosAtualizados.getPotenciaWatts());
+        equipamento.setTipo(dadosAtualizados.getTipo());
+        equipamento.setVazaoLH(dadosAtualizados.getVazaoLH());
+
+        return equipamentoRepository.save(equipamento);
+    }
+
+    public void excluir(int id){
+        equipamentoRepository.delete(buscarPorId(id));
+    }
+
+
+
 }
