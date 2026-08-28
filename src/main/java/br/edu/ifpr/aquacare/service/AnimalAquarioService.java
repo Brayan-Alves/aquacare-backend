@@ -56,6 +56,26 @@ public class AnimalAquarioService {
             for (int j = i+1; j < animais.size(); j++) {
                 Animal a = animais.get(i);
                 Animal b = animais.get(j);
+
+                if(faixasIncompativeis(a.getPhMin(), a.getPhMax(), b.getPhMin(), b.getPhMax())){
+                    conflitos.add(a.getNomePopular() + " e " + b.getNomePopular() + " incompatíveis: faixas de pH não se sobrepõem.");
+                }
+
+                if(faixasIncompativeis(a.getTempMin(), a.getTempMax(), b.getTempMin(), b.getTempMax())){
+                    conflitos.add(a.getNomePopular() + " e " + b.getNomePopular() + " incompatíveis: faixas de temperatura não se sobrepõem.");
+                }
+
+                if(!(a.getGhMin() == null || b.getGhMin() == null || a.getGhMax() == null || b.getGhMax() == null)){
+                    if(faixasIncompativeis(a.getGhMin(), a.getGhMax(), b.getGhMin(), b.getGhMax())){
+                    conflitos.add(a.getNomePopular() + " e " + b.getNomePopular() + " incompatíveis: faixas de gH não se sobrepõem.");
+                    }
+                }
+                
+                if(!(a.getSalinidadeMin() == null || b.getSalinidadeMin() == null || a.getSalinidadeMax() == null || b.getSalinidadeMax() == null)){
+                    if(faixasIncompativeis(a.getSalinidadeMin(), a.getSalinidadeMax(), b.getSalinidadeMin(), b.getSalinidadeMax())){
+                        conflitos.add(a.getNomePopular() + " e " + b.getNomePopular() + " incompatíveis: faixas de salinidade não se sobrepõem.");
+                    }
+                }
             }
 
         
