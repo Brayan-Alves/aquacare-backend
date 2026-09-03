@@ -1,5 +1,7 @@
 package br.edu.ifpr.aquacare.entity;
 
+import br.edu.ifpr.aquacare.enums.Agressividade;
+import br.edu.ifpr.aquacare.enums.RegiaoNado;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,14 +49,16 @@ public class Animal {
     @Column(nullable = true)
     private Float salinidadeMax;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String agressividade;
+    private Agressividade agressividade;
 
-    @Column(nullable = false, length = 20)
-    private String porte;
+    @Column(nullable = false)
+    private float tamanhoMedio;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String regiaoNado;
+    private RegiaoNado regiaoNado;
 
     @Column(nullable = false, length = 20)
     private String habitoAlimentar;

@@ -41,7 +41,7 @@ public class AnimalService {
         animal.setAgressividade(dadosAtualizados.getAgressividade());
         animal.setGhMin(dadosAtualizados.getGhMin());
         animal.setGhMax(dadosAtualizados.getGhMax());
-        animal.setPorte(dadosAtualizados.getPorte());
+        animal.setTamanhoMedio(dadosAtualizados.getTamanhoMedio());
         animal.setRegiaoNado(dadosAtualizados.getRegiaoNado());
         animal.setSalinidadeMin(dadosAtualizados.getSalinidadeMin());
         animal.setSalinidadeMax(dadosAtualizados.getSalinidadeMax());
