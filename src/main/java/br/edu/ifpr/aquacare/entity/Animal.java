@@ -1,6 +1,7 @@
 package br.edu.ifpr.aquacare.entity;
 
 import br.edu.ifpr.aquacare.enums.Agressividade;
+import br.edu.ifpr.aquacare.enums.PadraoTerritorial;
 import br.edu.ifpr.aquacare.enums.RegiaoNado;
 import jakarta.persistence.*;
 import lombok.*;
@@ -53,6 +54,10 @@ public class Animal {
     @Column(nullable = false, length = 20)
     private Agressividade agressividade;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private PadraoTerritorial padraoTerritorial;
+
     @Column(nullable = false)
     private float tamanhoMedio;
 
@@ -71,5 +76,8 @@ public class Animal {
 
     @Column(nullable = false, length = 20)
     private String sensibilidadeNitrato;
+
+    @Column(nullable = true)
+    private Integer quantidadeMinimaGrupo;
 }
 

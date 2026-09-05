@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import br.edu.ifpr.aquacare.entity.Animal;
+import br.edu.ifpr.aquacare.enums.Agressividade;
+import br.edu.ifpr.aquacare.enums.RegiaoNado;
 import br.edu.ifpr.aquacare.repository.AnimalRepository;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -29,6 +31,22 @@ public class AnimalService {
         return animalRepository.findAll();
     }
 
+    public List<Animal> buscarPorNomePopular(String nome){
+        return animalRepository.findByNomePopularContainingIgnoreCase(nome);
+    }
+
+    public List<Animal> buscarPorNomeCientifico(String nome){
+        return animalRepository.findByNomeCientificoContainingIgnoreCase(nome);
+    }
+
+    public List<Animal> buscarPorAgressividade(Agressividade agressividade){
+        return  animalRepository.findByAgressividade(agressividade);
+    }
+
+    public List<Animal> buscarPorRegiaoDeNado(RegiaoNado regiaoNado){
+        return  animalRepository.findByRegiaoNado(regiaoNado);
+    }
+
     public Animal atualizar(int id, Animal dadosAtualizados){
         Animal animal = buscarPorId(id);
 
@@ -39,6 +57,8 @@ public class AnimalService {
         animal.setDescricao(dadosAtualizados.getDescricao());
         animal.setHabitoAlimentar(dadosAtualizados.getHabitoAlimentar());
         animal.setAgressividade(dadosAtualizados.getAgressividade());
+        animal.setPadraoTerritorial(dadosAtualizados.getPadraoTerritorial());
+        animal.setQuantidadeMinimaGrupo(dadosAtualizados.getQuantidadeMinimaGrupo());
         animal.setGhMin(dadosAtualizados.getGhMin());
         animal.setGhMax(dadosAtualizados.getGhMax());
         animal.setTamanhoMedio(dadosAtualizados.getTamanhoMedio());

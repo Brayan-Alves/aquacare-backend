@@ -9,11 +9,15 @@ import br.edu.ifpr.aquacare.entity.AnimalAquario;
 import br.edu.ifpr.aquacare.entity.Planta;
 import br.edu.ifpr.aquacare.entity.PlantaAquario;
 import br.edu.ifpr.aquacare.enums.Agressividade;
+import br.edu.ifpr.aquacare.enums.PadraoTerritorial;
 import br.edu.ifpr.aquacare.repository.AnimalAquarioRepository;
 import br.edu.ifpr.aquacare.repository.PlantaAquarioRepository;
 
 @Service
 public class CompatibilidadeService{
+
+    private static final float RAZAO_PREDACAO_MAXIMA = 3f;
+
     private final AnimalAquarioRepository animalAquarioRepository;
     private final PlantaAquarioRepository plantaAquarioRepository;
 
@@ -24,6 +28,23 @@ public class CompatibilidadeService{
 
     private boolean faixasIncompativeis(float min1, float max1, float min2, float max2){
         return Math.max(min1,min2) > Math.min(max1,max2);
+    }
+
+    private boolean agressividadeIncompativel(Animal existente, Animal novoAnimal){
+        return existente.getRegiaoNado() == novoAnimal.getRegiaoNado()
+            && (existente.getAgressividade() == Agressividade.AGRESSIVO || novoAnimal.getAgressividade() == Agressividade.AGRESSIVO);
+    }
+
+    private boolean territorialismoIncompativel(Animal existente, Animal novoAnimal){
+        return existente.getRegiaoNado() == novoAnimal.getRegiaoNado()
+            && existente.getPadraoTerritorial() == PadraoTerritorial.TERRITORIAL
+            && novoAnimal.getPadraoTerritorial() == PadraoTerritorial.TERRITORIAL;
+    }
+
+    private boolean riscoPredacao(Animal existente, Animal novoAnimal){
+        float maior = Math.max(existente.getTamanhoMedio(), novoAnimal.getTamanhoMedio());
+        float menor = Math.min(existente.getTamanhoMedio(), novoAnimal.getTamanhoMedio());
+        return (maior / menor) >= RAZAO_PREDACAO_MAXIMA;
     }
 
     public void validarNovoAnimal(int idAquario, Animal novoAnimal){
@@ -45,8 +66,16 @@ public class CompatibilidadeService{
                 throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": faixa de salinidade não se sobrepõem.");
             }
 
-            if((existente.getRegiaoNado() == novoAnimal.getRegiaoNado()) && existente.getAgressividade() != Agressividade.PACIFICO || novoAnimal.getAgressividade() != Agressividade.PACIFICO){
-                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": dividem a mesma região de nado e pelo menos um é agressivo/semi-agressivo")
+            if(agressividadeIncompativel(existente, novoAnimal)){
+                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": ambos ocupam a mesma região de nado e pelo menos um é agressivo.");
+            }
+
+            if(territorialismoIncompativel(existente, novoAnimal)){
+                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": ambos são territorialistas na mesma região de nado.");
+            }
+
+            if(riscoPredacao(existente, novoAnimal)){
+                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": diferença de tamanho indica risco de predação.");
             }
         }
 

@@ -18,6 +18,7 @@ public class EquipamentoService {
     }
 
     public Equipamento cadastrar(Equipamento equipamento){
+        verificarTipagem(equipamento);
         return equipamentoRepository.save(equipamento);
     }
 
@@ -44,7 +45,17 @@ public class EquipamentoService {
         equipamento.setTipo(dadosAtualizados.getTipo());
         equipamento.setVazaoLH(dadosAtualizados.getVazaoLH());
 
+        verificarTipagem(equipamento);
+
         return equipamentoRepository.save(equipamento);
+    }
+
+    private void verificarTipagem(Equipamento equipamento){
+        switch(equipamento.getTipo()){
+            case FILTRO -> { if (equipamento.getVazaoLH() == null) throw new IllegalArgumentException("Vazão é obrigatória para equipamento do tipo FILTRO."); }
+            case TERMOSTATO -> { if (equipamento.getPotenciaWatts() == null) throw new IllegalArgumentException("Potência é obrigatória para equipamento do tipo TERMOSTATO."); }
+            case ILUMINACAO -> { if (equipamento.getLumens() == null) throw new IllegalArgumentException("Lumens é obrigatório para equipamento do tipo ILUMINACAO."); }
+        }
     }
 
     public void excluir(int id){

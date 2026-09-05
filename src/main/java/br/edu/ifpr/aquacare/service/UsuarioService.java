@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import br.edu.ifpr.aquacare.entity.Usuario;
 import br.edu.ifpr.aquacare.repository.UsuarioRepository;
 import br.edu.ifpr.aquacare.security.TokenService;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class UsuarioService {
@@ -36,5 +37,22 @@ public class UsuarioService {
         }
 
         return tokenService.gerarToken(email);
+    }
+
+    public Usuario buscarPorId(String id){
+        return usuarioRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+    }
+
+    public Usuario atualizar(String id, Usuario dadosAtualizados){
+        Usuario usuario = buscarPorId(id);
+
+        usuario.setNome(dadosAtualizados.getNome());
+        usuario.setEmail(dadosAtualizados.getEmail());
+
+        return usuarioRepository.save(usuario);
+    }
+
+    public void excluir(String id){
+        usuarioRepository.delete(buscarPorId(id));
     }
 }

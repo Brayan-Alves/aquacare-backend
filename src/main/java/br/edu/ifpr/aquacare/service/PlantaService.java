@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import br.edu.ifpr.aquacare.entity.Planta;
+import br.edu.ifpr.aquacare.enums.Dificuldade;
+import br.edu.ifpr.aquacare.enums.Iluminacao;
 import br.edu.ifpr.aquacare.repository.PlantaRepository;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -27,6 +29,22 @@ public class PlantaService {
 
     public Planta buscarPorId(int id){
         return plantaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Planta não encontrada."));
+    }
+
+    public List<Planta> buscarPorNomePopular(String nome){
+        return plantaRepository.findByNomePopularContainingIgnoreCase(nome);
+    }
+
+    public List<Planta> buscarPorNomeCientifico(String nome){
+        return plantaRepository.findByNomeCientificoContainingIgnoreCase(nome);
+    }
+
+    public List<Planta> buscarPorDificuldade(Dificuldade dificuldade){
+        return plantaRepository.findByDificuldade(dificuldade);
+    }
+
+    public List<Planta> buscarPorIluminacao(Iluminacao iluminacao){
+        return plantaRepository.findByIluminacao(iluminacao);
     }
 
     public Planta atualizar(int id, Planta dadosAtualizados){
