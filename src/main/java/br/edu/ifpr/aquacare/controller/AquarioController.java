@@ -5,12 +5,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import br.edu.ifpr.aquacare.entity.Aquario;
 import br.edu.ifpr.aquacare.enums.NivelPlanta;
 import br.edu.ifpr.aquacare.enums.TipoAgua;
 import br.edu.ifpr.aquacare.service.AquarioService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 @RequestMapping("/aquarios")
@@ -33,7 +33,7 @@ public class AquarioController {
         aquario.setTipoAgua(dados.tipoAgua());
         aquario.setNivelPlantas(dados.nivelPlanta());
         aquario.setCiclado(dados.isCiclado());
-        aquario.setInjecaoCO2(dados.isCiclado());
+        aquario.setInjecaoCO2(dados.injecaoCO2());
 
         aquarioService.cadastrar(aquario);
         return ResponseEntity.status(HttpStatus.CREATED).build();
