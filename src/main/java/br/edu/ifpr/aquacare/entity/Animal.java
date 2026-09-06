@@ -3,6 +3,7 @@ package br.edu.ifpr.aquacare.entity;
 import br.edu.ifpr.aquacare.enums.Agressividade;
 import br.edu.ifpr.aquacare.enums.PadraoTerritorial;
 import br.edu.ifpr.aquacare.enums.RegiaoNado;
+import br.edu.ifpr.aquacare.enums.Sensibilidade;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -51,31 +52,40 @@ public class Animal {
     private Float salinidadeMax;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private Agressividade agressividade;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private PadraoTerritorial padraoTerritorial;
 
     @Column(nullable = false)
     private float tamanhoMedio;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private RegiaoNado regiaoNado;
 
     @Column(nullable = false, length = 20)
     private String habitoAlimentar;
 
-    @Column(nullable = false, length = 20)
-    private String sensibilidadeAmonia;
+    @Column(nullable = true)
+    private Float lc50Amonia;
 
-    @Column(nullable = false, length = 20)
-    private String sensibilidadeNitrito;
+    @Column(nullable = true)
+    private Float lc50Nitrito;
 
-    @Column(nullable = false, length = 20)
-    private String sensibilidadeNitrato;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Sensibilidade sensibilidadeAmonia;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Sensibilidade sensibilidadeNitrito;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Sensibilidade sensibilidadeNitrato;
 
     @Column(nullable = true)
     private Integer quantidadeMinimaGrupo;

@@ -1,5 +1,6 @@
 package br.edu.ifpr.aquacare.service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -37,5 +38,13 @@ public class PasswordResetTokenService {
         passwordResetToken.setUsado(true);
 
         return passwordResetTokenRepository.save(passwordResetToken);
+    }
+
+    public PasswordResetToken validarToken(String token){
+        PasswordResetToken passwordResetToken = buscarPorToken(token);
+        if(passwordResetToken.isUsado() || passwordResetToken.getDataExpiracao().isBefore(LocalDateTime.now())){
+            throw new IllegalArgumentException("Token foi expirado ou já foi usado.");
+        }
+        return passwordResetToken;
     }
 }

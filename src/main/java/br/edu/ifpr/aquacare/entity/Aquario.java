@@ -2,6 +2,7 @@ package br.edu.ifpr.aquacare.entity;
 
 import java.time.LocalDateTime;
 
+import br.edu.ifpr.aquacare.enums.NivelPlanta;
 import br.edu.ifpr.aquacare.enums.TipoAgua;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,8 +32,9 @@ private float litragem;
 @Column(nullable = false)
 private TipoAgua tipoAgua;
 
-@Column(nullable = false, length = 20)
-private String nivelPlantas;
+@Enumerated(EnumType.STRING)
+@Column(nullable = false)
+private NivelPlanta nivelPlantas;
 
 @Column(nullable = false)
 private LocalDateTime dataMontagem;

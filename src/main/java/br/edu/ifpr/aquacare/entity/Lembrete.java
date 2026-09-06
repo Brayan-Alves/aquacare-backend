@@ -37,8 +37,12 @@ public class Lembrete {
     private String titulo;
 
     @Column(nullable = false)
-    private LocalDateTime datahoraLembrete;
+    private LocalDateTime dataHoraLembrete;
 
     @Column(nullable = false)
     private boolean isConcluido;
+
+    @Column(nullable = false)
+    private boolean notificado;
+
 }

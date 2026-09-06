@@ -110,7 +110,15 @@ public class CompatibilidadeService{
         }
     }
 
+    public boolean isCompativel(int idAquario, Animal animal){
+        try{
+            validarNovoAnimal(idAquario, animal);
+            return true;
+        }catch (IllegalArgumentException e) {
+            return  false;
+        }
 
 
-    
+
+    }
 }

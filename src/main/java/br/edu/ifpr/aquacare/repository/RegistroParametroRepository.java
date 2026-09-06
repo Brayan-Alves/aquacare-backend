@@ -8,4 +8,7 @@ import br.edu.ifpr.aquacare.entity.RegistroParametro;
 
 public interface RegistroParametroRepository extends JpaRepository<RegistroParametro, Integer>{ 
     List<RegistroParametro> findByAquarioId(int id);
+    RegistroParametro findFirstByAquarioIdOrderByDataHoraDesc(int idAquario);
 }
+
+

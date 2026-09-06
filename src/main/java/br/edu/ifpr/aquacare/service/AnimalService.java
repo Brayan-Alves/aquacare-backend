@@ -61,6 +61,8 @@ public class AnimalService {
         animal.setQuantidadeMinimaGrupo(dadosAtualizados.getQuantidadeMinimaGrupo());
         animal.setGhMin(dadosAtualizados.getGhMin());
         animal.setGhMax(dadosAtualizados.getGhMax());
+        animal.setLc50Amonia(dadosAtualizados.getLc50Amonia());
+        animal.setLc50Nitrito(dadosAtualizados.getLc50Nitrito());
         animal.setTamanhoMedio(dadosAtualizados.getTamanhoMedio());
         animal.setRegiaoNado(dadosAtualizados.getRegiaoNado());
         animal.setSalinidadeMin(dadosAtualizados.getSalinidadeMin());
