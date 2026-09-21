@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import br.edu.ifpr.aquacare.entity.Aquario;
+import br.edu.ifpr.aquacare.entity.Usuario;
 import br.edu.ifpr.aquacare.enums.NivelPlanta;
 import br.edu.ifpr.aquacare.enums.TipoAgua;
 import br.edu.ifpr.aquacare.service.AquarioService;
@@ -31,10 +33,11 @@ public class AquarioController {
     public record DadosRequest(String nome, float litragem, TipoAgua tipoAgua, NivelPlanta nivelPlanta, boolean isCiclado, boolean injecaoCO2){}
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<Void> cadastrar(@RequestBody DadosRequest dados){
+    public ResponseEntity<Void> cadastrar(@RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
         Aquario aquario = new Aquario();
 
         aquario.setNome(dados.nome());
+        aquario.setUsuario(usuario);
         aquario.setLitragem(dados.litragem());
         aquario.setTipoAgua(dados.tipoAgua());
         aquario.setNivelPlantas(dados.nivelPlanta());

@@ -8,8 +8,6 @@ import br.edu.ifpr.aquacare.entity.Usuario;
 import br.edu.ifpr.aquacare.repository.UsuarioRepository;
 import br.edu.ifpr.aquacare.security.TokenService;
 import jakarta.persistence.EntityNotFoundException;
-import br.edu.ifpr.aquacare.service.PasswordResetTokenService;
-import br.edu.ifpr.aquacare.service.EmailService;
 
 @Service
 public class UsuarioService {

@@ -6,6 +6,8 @@ import br.edu.ifpr.aquacare.enums.Role;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "usuario")
 @Getter
@@ -24,6 +26,7 @@ public class Usuario {
     private String email;
 
     @Column(nullable = false, length = 64)
+    @JsonIgnore 
     private String senhaHash;
 
     @Column(nullable = false, length = 100)

@@ -2,6 +2,7 @@ package br.edu.ifpr.aquacare.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,6 +27,9 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/usuarios/login", "/usuarios/cadastrar", "/usuarios/recuperar-senha", "/usuarios/redefinir-senha").permitAll()
+            .requestMatchers(HttpMethod.POST, "/animal/**", "/planta/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/animal/**", "/planta/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/animal/**", "/planta/**").hasRole("ADMIN")
             .anyRequest().authenticated()
         )
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
