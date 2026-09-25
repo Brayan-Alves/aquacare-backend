@@ -1,6 +1,5 @@
 package br.edu.ifpr.aquacare.controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -15,25 +14,30 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.ifpr.aquacare.entity.RegistroParametro;
 import br.edu.ifpr.aquacare.service.AquarioService;
+
+import br.edu.ifpr.aquacare.service.Alerta;
 import br.edu.ifpr.aquacare.service.RegistroParametroService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import br.edu.ifpr.aquacare.service.AnaliseParametroService;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RequestMapping("/registro")
 @RestController 
 public class RegistroParametroController {
     
     private final RegistroParametroService registroParametroService;
+    private final AnaliseParametroService analiseParametroService;
     private final AquarioService aquarioService;
 
-    public RegistroParametroController(RegistroParametroService registroParametroService, AquarioService aquarioService){
+    public RegistroParametroController(RegistroParametroService registroParametroService, AquarioService aquarioService, AnaliseParametroService analiseParametroService){
         this.registroParametroService = registroParametroService;
         this.aquarioService = aquarioService;
+        this.analiseParametroService = analiseParametroService;
     }
 
     public record DadosRequest(int idAquario, float ph, float temperatura, float amonia, Float nitrato, Float nitrito, Float gh, Float kh, Float co2, Float salinidade, Float calcio, Float magnesio){}
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<RegistroParametro> cadastrar(@RequestBody DadosRequest dados){
+    public ResponseEntity<List<Alerta>> cadastrar(@RequestBody DadosRequest dados){
         RegistroParametro registro = new RegistroParametro();
 
         registro.setAmonia(dados.amonia());
@@ -49,9 +53,10 @@ public class RegistroParametroController {
         registro.setSalinidade(dados.salinidade());
         registro.setTemperatura(dados.temperatura());
 
-        registroParametroService.cadastrar(registro);
+        RegistroParametro salvo = registroParametroService.cadastrar(registro);
+        List<Alerta> alertas = analiseParametroService.analisar(salvo);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(alertas);
     }
 
     @GetMapping("/{id}")
