@@ -1,5 +1,6 @@
 package br.edu.ifpr.aquacare.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class RegistroParametroService {
     public RegistroParametro atualizar(int id, RegistroParametro dadosAtualizados){
         RegistroParametro registro = buscarPorId(id);
 
-        registro.setDataHora(dadosAtualizados.getDataHora());
+        registro.setDataHora(LocalDateTime.now());
         registro.setPh(dadosAtualizados.getPh());
         registro.setTemperatura(dadosAtualizados.getTemperatura());
         registro.setAmonia(dadosAtualizados.getAmonia());
