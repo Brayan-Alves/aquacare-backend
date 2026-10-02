@@ -1,7 +1,7 @@
 package br.edu.ifpr.aquacare.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,23 +14,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import br.edu.ifpr.aquacare.entity.Animal;
 import br.edu.ifpr.aquacare.entity.Aquario;
 import br.edu.ifpr.aquacare.entity.Usuario;
 import br.edu.ifpr.aquacare.enums.NivelPlanta;
 import br.edu.ifpr.aquacare.enums.TipoAgua;
 import br.edu.ifpr.aquacare.service.AquarioService;
+import br.edu.ifpr.aquacare.service.DiagnosticoService;
+import br.edu.ifpr.aquacare.service.RecomendacaoService;
+import br.edu.ifpr.aquacare.service.DiagnosticoService.Diagnostico;
+import br.edu.ifpr.aquacare.service.RecomendacaoService.ParametrosIdeais;;
 
 @RestController
 @RequestMapping("/aquarios")
 public class AquarioController {
     
     private final AquarioService aquarioService;
+    private final DiagnosticoService diagnosticoService;
+    private final RecomendacaoService recomendacaoService;
 
-    public AquarioController(AquarioService aquarioService){
+    public AquarioController(AquarioService aquarioService, DiagnosticoService diagnosticoService, RecomendacaoService recomendacaoService){
         this.aquarioService = aquarioService;
+        this.diagnosticoService = diagnosticoService;
+        this.recomendacaoService = recomendacaoService;
     }
 
     public record DadosRequest(String nome, float litragem, TipoAgua tipoAgua, NivelPlanta nivelPlanta, boolean isCiclado, boolean injecaoCO2){}
+
+    public record AquarioResponse(int id, String nome, float litragem, TipoAgua tipoAgua, NivelPlanta nivelPlantas, LocalDateTime dataMontagem, boolean isCiclado, boolean injecaoCO2){
+        public static AquarioResponse from(Aquario aquario){
+            return new AquarioResponse(aquario.getId(), aquario.getNome(), aquario.getLitragem(), aquario.getTipoAgua(), aquario.getNivelPlantas(), aquario.getDataMontagem(), aquario.isCiclado(), aquario.isInjecaoCO2());
+    }
+}
+
 
     @PostMapping("/cadastrar")
     public ResponseEntity<Void> cadastrar(@RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
@@ -49,21 +65,21 @@ public class AquarioController {
     }
 
     @GetMapping("/listar-todos")
-    public ResponseEntity<List<Aquario>> listarTodos(){
+    public ResponseEntity<List<AquarioResponse>> listarTodos(){
         List<Aquario> aquarios = aquarioService.listarTodos();
-        return ResponseEntity.ok(aquarios);
+        return ResponseEntity.ok(aquarios.stream().map(AquarioResponse::from).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Aquario> buscarPorId(@PathVariable  int id){
+    public ResponseEntity<AquarioResponse> buscarPorId(@PathVariable  int id){
         Aquario aquario = aquarioService.buscarPorId(id);
-        return ResponseEntity.ok(aquario);
+        return ResponseEntity.ok(AquarioResponse.from(aquario));
     }
 
-    @GetMapping("/usuarios/{id}")
-    public ResponseEntity<List<Aquario>> listarPorUsuario(@PathVariable String id){
-        List<Aquario> aquario = aquarioService.listarPorUsuario(id);
-        return ResponseEntity.ok(aquario);
+    @GetMapping("/meus")
+    public ResponseEntity<List<AquarioResponse>> listarPorUsuario(@AuthenticationPrincipal Usuario usuario){
+        List<Aquario> aquarios = aquarioService.listarPorUsuario(usuario.getId());
+        return ResponseEntity.ok(aquarios.stream().map(AquarioResponse::from).toList());
     }
 
     @PutMapping("/{id}")
@@ -85,6 +101,27 @@ public class AquarioController {
     public ResponseEntity<Void> excluir(@PathVariable int id){
         aquarioService.excluir(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/diagnostico")
+    public ResponseEntity<Diagnostico> diagnosticar(@PathVariable int id){
+        Diagnostico diagnostico = diagnosticoService.diagnosticar(id);
+
+        return ResponseEntity.ok(diagnostico);
+    }
+
+    @GetMapping("/{id}/parametros-ideais") 
+    public ResponseEntity<ParametrosIdeais> recomendarParametros(@PathVariable int id){
+        ParametrosIdeais parametros = recomendacaoService.sugerirParametrosIdeais(id);
+
+        return ResponseEntity.ok(parametros);
+    }
+    
+    @GetMapping("/{id}/especies-recomendadas")
+    public ResponseEntity<List<Animal>> recomendarEspecies(@PathVariable int id){
+        List<Animal> animaisRecomendados =  recomendacaoService.sugerirEspecies(id);
+
+        return ResponseEntity.ok(animaisRecomendados);
     }
 
 }
