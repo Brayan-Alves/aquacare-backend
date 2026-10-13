@@ -1,12 +1,13 @@
 package br.edu.ifpr.aquacare;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import me.paulschwarz.springdotenv.spring.DotenvApplicationInitializer;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @EnableScheduling
 public class AquacareApplication {
 
