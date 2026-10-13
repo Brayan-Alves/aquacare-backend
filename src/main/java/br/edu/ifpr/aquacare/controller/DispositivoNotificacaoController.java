@@ -39,7 +39,7 @@ public class DispositivoNotificacaoController {
     public record DadosRequest(String expoPushToken){}
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<DispositivoNotificacao> cadastrar(@RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
+    public ResponseEntity<Void> cadastrar(@RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
         DispositivoNotificacao dispositivo = new DispositivoNotificacao();
 
         dispositivo.setExpoPushToken(dados.expoPushToken());

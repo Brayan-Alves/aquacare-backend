@@ -42,7 +42,7 @@ public class LembreteController {
     }
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<Lembrete> cadastrar(@RequestBody  DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
+    public ResponseEntity<Void> cadastrar(@RequestBody  DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
         Lembrete lembrete = new Lembrete();
 
         lembrete.setUsuario(usuario);

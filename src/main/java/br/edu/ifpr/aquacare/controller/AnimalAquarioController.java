@@ -44,7 +44,7 @@ public class AnimalAquarioController {
     public record DadosRequest(int idAnimal, int idAquario, int quantidade){}
 
     @PostMapping("/associar")
-    public ResponseEntity<AnimalAquario> associar(@RequestBody DadosRequest dados){
+    public ResponseEntity<Void> associar(@RequestBody DadosRequest dados){
         AnimalAquario animalAquario = new AnimalAquario();
 
         animalAquario.setAnimal(animalService.buscarPorId(dados.idAnimal()));

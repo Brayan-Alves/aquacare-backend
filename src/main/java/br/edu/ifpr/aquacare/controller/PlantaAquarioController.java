@@ -43,7 +43,7 @@ public class PlantaAquarioController {
     }
 
     @PostMapping("/associar")
-    public ResponseEntity<PlantaAquario> associar(@RequestBody DadosRequest dados){
+    public ResponseEntity<Void> associar(@RequestBody DadosRequest dados){
         PlantaAquario plantaAquario = new PlantaAquario();
 
         plantaAquario.setAquario(aquarioService.buscarPorId(dados.idAquario()));
