@@ -27,6 +27,7 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/usuarios/login", "/usuarios/cadastrar", "/usuarios/recuperar-senha", "/usuarios/redefinir-senha").permitAll()
+            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
             .requestMatchers(HttpMethod.POST, "/animal/**", "/planta/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/animal/**", "/planta/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/animal/**", "/planta/**").hasRole("ADMIN")
