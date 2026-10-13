@@ -24,12 +24,17 @@ import br.edu.ifpr.aquacare.service.LembreteService;
 @RequestMapping("/lembrete")
 @RestController
 public class LembreteController {
-    
+
     private final LembreteService lembreteService;
     private final AquarioService aquarioService;
 
     public record DadosRequest(int idAquario, String titulo, LocalDateTime dataHoraLembrete, boolean concluido, boolean notificado){}
 
+    public record LembreteResponse(int idLembrete, int idAquario, String titulo, LocalDateTime dataHoraLembrete, boolean concluido, boolean notificado){
+        public static LembreteResponse from(Lembrete lembrete){
+            return new LembreteResponse(lembrete.getIdLembrete(), lembrete.getAquario().getId(), lembrete.getTitulo(), lembrete.getDataHoraLembrete(), lembrete.isConcluido(), lembrete.isNotificado());
+        }
+    }
 
     public LembreteController(LembreteService lembreteService, AquarioService aquarioService){
         this.lembreteService = lembreteService;
@@ -54,24 +59,24 @@ public class LembreteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Lembrete> buscraPorId(@PathVariable int id){
+    public ResponseEntity<LembreteResponse> buscraPorId(@PathVariable int id){
         Lembrete lembrete = lembreteService.buscarPorId(id);
 
-        return ResponseEntity.ok(lembrete);
+        return ResponseEntity.ok(LembreteResponse.from(lembrete));
     }
 
     @GetMapping("/aquario/{id}")
-    public ResponseEntity<List<Lembrete>> buscarPorIdAquario(@PathVariable int id){
+    public ResponseEntity<List<LembreteResponse>> buscarPorIdAquario(@PathVariable int id){
         List<Lembrete> lembretes = lembreteService.listarPorAquario(id);
 
-        return ResponseEntity.ok(lembretes);
+        return ResponseEntity.ok(lembretes.stream().map(LembreteResponse::from).toList());
     }
 
     @GetMapping("/meus")
-    public ResponseEntity<List<Lembrete>> buscarPorIdUsuario(@AuthenticationPrincipal Usuario usuario){
+    public ResponseEntity<List<LembreteResponse>> buscarPorIdUsuario(@AuthenticationPrincipal Usuario usuario){
         List<Lembrete> lembretes = lembreteService.listarPorUsuario(usuario.getId());
 
-        return ResponseEntity.ok(lembretes);
+        return ResponseEntity.ok(lembretes.stream().map(LembreteResponse::from).toList());
     }
 
     @PutMapping("/{id}")
@@ -94,5 +99,5 @@ public class LembreteController {
 
         return ResponseEntity.noContent().build();
     }
-    
+
 }

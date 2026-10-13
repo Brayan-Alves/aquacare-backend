@@ -1,5 +1,6 @@
 package br.edu.ifpr.aquacare.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,12 @@ public class PlantaAquarioController {
 
     public record DadosRequest(int idPlanta, int idAquario, int quantidade){}
 
+    public record PlantaAquarioResponse(int id, int idPlanta, int idAquario, int quantidade, LocalDate dataPlantio){
+        public static PlantaAquarioResponse from(PlantaAquario plantaAquario){
+            return new PlantaAquarioResponse(plantaAquario.getId(), plantaAquario.getPlanta().getIdPlanta(), plantaAquario.getAquario().getId(), plantaAquario.getQuantidade(), plantaAquario.getDataPlantio());
+        }
+    }
+
 
     public PlantaAquarioController(PlantaAquarioService plantaAquarioService, PlantaService plantaService, AquarioService aquarioService){
         this.plantaService = plantaService;
@@ -49,17 +56,17 @@ public class PlantaAquarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlantaAquario> buscarPorId(@PathVariable int id){
+    public ResponseEntity<PlantaAquarioResponse> buscarPorId(@PathVariable int id){
         PlantaAquario plantaAquario = plantaAquarioService.buscarPorId(id);
 
-        return ResponseEntity.ok(plantaAquario);
+        return ResponseEntity.ok(PlantaAquarioResponse.from(plantaAquario));
     }
 
     @GetMapping("/aquario/{id}")
-    public ResponseEntity<List<PlantaAquario>> listarPorIdAqauario(@PathVariable int id){
+    public ResponseEntity<List<PlantaAquarioResponse>> listarPorIdAqauario(@PathVariable int id){
         List<PlantaAquario> plantas = plantaAquarioService.listarPorAquario(id);
 
-        return ResponseEntity.ok(plantas);
+        return ResponseEntity.ok(plantas.stream().map(PlantaAquarioResponse::from).toList());
     }
 
     @PutMapping("/{id}")

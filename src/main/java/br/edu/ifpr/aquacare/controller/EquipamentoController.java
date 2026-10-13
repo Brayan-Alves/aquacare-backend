@@ -25,6 +25,13 @@ public class EquipamentoController {
     private final EquipamentoService equipamentoService;
     private final AquarioService aquarioService;
 
+    public record EquipamentoResponse(int idEquipamento, int idAquario, TipoEquipamento tipo, String nome, String modelo, String marca, Integer potenciaWatts, Integer vazaoLH, Float lumens){
+        public static EquipamentoResponse from(Equipamento equipamento){
+            return new EquipamentoResponse(equipamento.getIdEquipamento(), equipamento.getAquario().getId(), equipamento.getTipo(), equipamento.getNome(), equipamento.getModelo(), equipamento.getMarca(), equipamento.getPotenciaWatts(), equipamento.getVazaoLH(), equipamento.getLumens());
+    }
+}
+
+
     public EquipamentoController(EquipamentoService equipamentoService, AquarioService aquarioService){
         this.equipamentoService = equipamentoService;
         this.aquarioService = aquarioService;
@@ -34,7 +41,7 @@ public class EquipamentoController {
 
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<Void> cadastrar(@RequestBody DadosRequest dados){
+    public ResponseEntity<EquipamentoResponse> cadastrar(@RequestBody DadosRequest dados){
         Equipamento equipamento = new Equipamento();
 
         equipamento.setAquario(aquarioService.buscarPorId(dados.idAquario()));
@@ -52,24 +59,24 @@ public class EquipamentoController {
     }
 
     @GetMapping("/listar-todos")
-    public ResponseEntity<List<Equipamento>> listarTodos(){
+    public ResponseEntity<List<EquipamentoResponse>> listarTodos(){
         List<Equipamento> equipamentos = equipamentoService.buscarTodos();
 
-        return ResponseEntity.ok(equipamentos);
+        return ResponseEntity.ok(equipamentos.stream().map(EquipamentoResponse::from).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Equipamento> buscarPorId(@PathVariable int id){
+    public ResponseEntity<EquipamentoResponse> buscarPorId(@PathVariable int id){
         Equipamento equipamento = equipamentoService.buscarPorId(id);
 
-        return ResponseEntity.ok(equipamento);
+        return ResponseEntity.ok(EquipamentoResponse.from(equipamento));
     }
 
     @GetMapping("/aquario/{id}")
-    public ResponseEntity<List<Equipamento>> buscarPorIdAquario(@PathVariable int id){
+    public ResponseEntity<List<EquipamentoResponse>> buscarPorIdAquario(@PathVariable int id){
         List<Equipamento> equipamentos = equipamentoService.listarPorAquarios(id);
 
-        return ResponseEntity.ok(equipamentos);
+        return ResponseEntity.ok(equipamentos.stream().map(EquipamentoResponse::from).toList());
     }
 
     @PutMapping("/{id}")

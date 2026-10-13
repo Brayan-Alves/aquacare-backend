@@ -1,5 +1,6 @@
 package br.edu.ifpr.aquacare.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,13 @@ public class AnimalAquarioController {
     private final AquarioService aquarioService;
     private final AnimalService animalService;
 
+
+    public record AnimalAquarioResponse(int id, int idAnimal, int idAquario, int quantidade, LocalDate dataAdicao){
+        public static AnimalAquarioResponse from(AnimalAquario animalAquario){
+            return new AnimalAquarioResponse(animalAquario.getId(), animalAquario.getAnimal().getIdAnimal(), animalAquario.getAquario().getId(), animalAquario.getQuantidade(), animalAquario.getDataAdicao());
+        }
+    }
+
     public AnimalAquarioController(AnimalAquarioService animalAquarioService, AnimalService animalService, AquarioService aquarioService){
         this.animalAquarioService = animalAquarioService;
         this.animalService = animalService;
@@ -49,17 +57,17 @@ public class AnimalAquarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AnimalAquario> buscarPorId(@PathVariable int id){
+    public ResponseEntity<AnimalAquarioResponse> buscarPorId(@PathVariable int id){
         AnimalAquario animalAquario = animalAquarioService.buscarPorId(id);
         
-        return ResponseEntity.ok(animalAquario);
+        return ResponseEntity.ok(AnimalAquarioResponse.from(animalAquario));
     }
 
     @GetMapping("/aquario/{id}")
-    public ResponseEntity<List<AnimalAquario>> buscarPorIdAquario(@PathVariable int id){
+    public ResponseEntity<List<AnimalAquarioResponse>> buscarPorIdAquario(@PathVariable int id){
         List<AnimalAquario> animais = animalAquarioService.listarPorAquario(id);
 
-        return ResponseEntity.ok(animais);
+        return ResponseEntity.ok(animais.stream().map(AnimalAquarioResponse::from).toList());
     }
 
     @PutMapping("/{id}")

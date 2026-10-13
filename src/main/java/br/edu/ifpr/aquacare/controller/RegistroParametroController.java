@@ -1,5 +1,6 @@
 package br.edu.ifpr.aquacare.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,13 @@ public class RegistroParametroController {
         this.analiseParametroService = analiseParametroService;
     }
 
+    public record RegistroParametroResponse(int idParametro, int idAquario, LocalDateTime dataHora, float ph, float temperatura, float amonia, Float nitrato, Float nitrito, Float gh, Float kh, Float co2, Float salinidade, Float calcio, Float magnesio){
+        public static RegistroParametroResponse from(RegistroParametro registro){
+            return new RegistroParametroResponse(registro.getIdParametro(), registro.getAquario().getId(), registro.getDataHora(), registro.getPh(), registro.getTemperatura(), registro.getAmonia(), registro.getNitrato(), registro.getNitrito(), registro.getGh(), registro.getKh(), registro.getCo2(), registro.getSalinidade(), registro.getCalcio(), registro.getMagnesio());
+    }
+}
+
+
     public record DadosRequest(int idAquario, float ph, float temperatura, float amonia, Float nitrato, Float nitrito, Float gh, Float kh, Float co2, Float salinidade, Float calcio, Float magnesio){}
 
     @PostMapping("/cadastrar")
@@ -60,17 +68,17 @@ public class RegistroParametroController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RegistroParametro> buscarPorId(@PathVariable int id){
+    public ResponseEntity<RegistroParametroResponse> buscarPorId(@PathVariable int id){
         RegistroParametro registro = registroParametroService.buscarPorId(id);
 
-        return ResponseEntity.ok(registro);
+        return ResponseEntity.ok(RegistroParametroResponse.from(registro));
     }
 
     @GetMapping("/aquario/{id}")
-    public ResponseEntity<List<RegistroParametro>> buscarPorIdAquario(@PathVariable int id){
+    public ResponseEntity<List<RegistroParametroResponse>> buscarPorIdAquario(@PathVariable int id){
         List<RegistroParametro> registro = registroParametroService.buscarPorIdAquario(id);
 
-        return ResponseEntity.ok(registro);
+        return ResponseEntity.ok(registro.stream().map(RegistroParametroResponse::from).toList());
     }
 
     @PutMapping("/{id}")

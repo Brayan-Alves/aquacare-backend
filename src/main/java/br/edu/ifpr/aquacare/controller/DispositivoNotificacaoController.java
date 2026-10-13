@@ -29,6 +29,13 @@ public class DispositivoNotificacaoController {
         this.dispositivoNotificacaoService = dispositivoNotificacaoService;
     }
 
+    public record DispositivoNotificacaoResponse(int idDispositivo, String expoPushToken){
+        public static DispositivoNotificacaoResponse from(DispositivoNotificacao dispositivo){
+            return new DispositivoNotificacaoResponse(dispositivo.getIdDispositivo(), dispositivo.getExpoPushToken());
+    }
+}
+
+
     public record DadosRequest(String expoPushToken){}
 
     @PostMapping("/cadastrar")
@@ -44,17 +51,17 @@ public class DispositivoNotificacaoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DispositivoNotificacao> buscarPorId(@PathVariable  int id){
+    public ResponseEntity<DispositivoNotificacaoResponse> buscarPorId(@PathVariable  int id){
         DispositivoNotificacao dispositivo = dispositivoNotificacaoService.buscarPorId(id);
 
-        return ResponseEntity.ok(dispositivo);
+        return ResponseEntity.ok(DispositivoNotificacaoResponse.from(dispositivo));
     }
 
     @GetMapping("/meus")
-    public ResponseEntity<List<DispositivoNotificacao>> buscarMeusDispositivos(@AuthenticationPrincipal Usuario usuario){
+    public ResponseEntity<List<DispositivoNotificacaoResponse>> buscarMeusDispositivos(@AuthenticationPrincipal Usuario usuario){
         List<DispositivoNotificacao> dispositivos = dispositivoNotificacaoService.listarPorUsuario(usuario.getId());
 
-        return ResponseEntity.ok(dispositivos);
+        return ResponseEntity.ok(dispositivos.stream().map(DispositivoNotificacaoResponse::from).toList());
     }
 
     @PutMapping("/{id}")
