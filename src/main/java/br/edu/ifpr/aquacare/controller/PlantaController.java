@@ -28,6 +28,12 @@ public class PlantaController {
         this.plantaService = plantaService;
     }
 
+    public record PlantaResponse(int idPlanta, String nomePopular, String nomeCientifico, String descricao, Dificuldade dificuldade, Iluminacao iluminacao, boolean co2Necessario, String crescimento, float alturaCm, float tempMin, float tempMax, float phMin, float phMax){
+        public static PlantaResponse from(Planta planta){
+            return new PlantaResponse(planta.getIdPlanta(), planta.getNomePopular(), planta.getNomeCientifico(), planta.getDescricao(), planta.getDificuldade(), planta.getIluminacao(), planta.isCo2Necessario(), planta.getCrescimento(), planta.getAlturaCm(), planta.getTempMin(), planta.getTempMax(), planta.getPhMin(), planta.getPhMax());
+        }
+    }
+
     public record DadosRequest(String nomePopular, String nomeCientifico, String descricao, Dificuldade dificuldade, Iluminacao iluminacao, boolean co2Necessario, String crescimento, float alturaCm, float tempMin, float tempMax, float phMin, float phMax){}
 
 
@@ -54,45 +60,45 @@ public class PlantaController {
     }
 
     @GetMapping("/listar-todos")
-    public ResponseEntity<List<Planta>> listarTodos(){
+    public ResponseEntity<List<PlantaResponse>> listarTodos(){
         List<Planta> plantas = plantaService.buscarTodos();
-        
-        return ResponseEntity.ok(plantas);
+
+        return ResponseEntity.ok(plantas.stream().map(PlantaResponse::from).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Planta> buscarPorId(@PathVariable int id){
+    public ResponseEntity<PlantaResponse> buscarPorId(@PathVariable int id){
         Planta planta = plantaService.buscarPorId(id);
-        
-        return ResponseEntity.ok(planta);
+
+        return ResponseEntity.ok(PlantaResponse.from(planta));
     }
 
     @GetMapping("/nome-popular/{nome}")
-    public ResponseEntity<List<Planta>> buscarPorNomePopular(@PathVariable String nome){
+    public ResponseEntity<List<PlantaResponse>> buscarPorNomePopular(@PathVariable String nome){
         List<Planta> plantas = plantaService.buscarPorNomePopular(nome);
-        
-        return ResponseEntity.ok(plantas);
+
+        return ResponseEntity.ok(plantas.stream().map(PlantaResponse::from).toList());
     }
 
     @GetMapping("/nome-cientifico/{nome}")
-    public ResponseEntity<List<Planta>> buscarPorNomeCientifico(@PathVariable String nome){
+    public ResponseEntity<List<PlantaResponse>> buscarPorNomeCientifico(@PathVariable String nome){
         List<Planta> plantas = plantaService.buscarPorNomeCientifico(nome);
-        
-        return ResponseEntity.ok(plantas);
+
+        return ResponseEntity.ok(plantas.stream().map(PlantaResponse::from).toList());
     }
 
     @GetMapping("/dificuldade/{dificuldade}")
-    public ResponseEntity<List<Planta>> buscarPorDificuldade(@PathVariable Dificuldade dificuldade){
+    public ResponseEntity<List<PlantaResponse>> buscarPorDificuldade(@PathVariable Dificuldade dificuldade){
         List<Planta> plantas = plantaService.buscarPorDificuldade(dificuldade);
 
-        return ResponseEntity.ok(plantas);
+        return ResponseEntity.ok(plantas.stream().map(PlantaResponse::from).toList());
     }
 
     @GetMapping("/iluminacao/{iluminacao}")
-    public ResponseEntity<List<Planta>> buscarPorIluminacao(@PathVariable Iluminacao iluminacao){
+    public ResponseEntity<List<PlantaResponse>> buscarPorIluminacao(@PathVariable Iluminacao iluminacao){
         List<Planta> plantas = plantaService.buscarPorIluminacao(iluminacao);
 
-        return ResponseEntity.ok(plantas);
+        return ResponseEntity.ok(plantas.stream().map(PlantaResponse::from).toList());
     }
 
     @PutMapping ("/{id}")

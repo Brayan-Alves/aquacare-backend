@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.edu.ifpr.aquacare.entity.Equipamento;
 import br.edu.ifpr.aquacare.enums.TipoEquipamento;
 import br.edu.ifpr.aquacare.service.AquarioService;
+import br.edu.ifpr.aquacare.service.DimensionamentoService;
 import br.edu.ifpr.aquacare.service.EquipamentoService;
 
 @RequestMapping("/equipamento")
@@ -24,18 +25,21 @@ public class EquipamentoController {
     
     private final EquipamentoService equipamentoService;
     private final AquarioService aquarioService;
-
-    public record EquipamentoResponse(int idEquipamento, int idAquario, TipoEquipamento tipo, String nome, String modelo, String marca, Integer potenciaWatts, Integer vazaoLH, Float lumens){
-        public static EquipamentoResponse from(Equipamento equipamento){
-            return new EquipamentoResponse(equipamento.getIdEquipamento(), equipamento.getAquario().getId(), equipamento.getTipo(), equipamento.getNome(), equipamento.getModelo(), equipamento.getMarca(), equipamento.getPotenciaWatts(), equipamento.getVazaoLH(), equipamento.getLumens());
-    }
-}
+    private final DimensionamentoService dimensionamentoService;
 
 
-    public EquipamentoController(EquipamentoService equipamentoService, AquarioService aquarioService){
+    public EquipamentoController(EquipamentoService equipamentoService, AquarioService aquarioService, DimensionamentoService dimensionamentoService){
         this.equipamentoService = equipamentoService;
         this.aquarioService = aquarioService;
+        this.dimensionamentoService = dimensionamentoService;
     }
+
+    public record EquipamentoResponse(int idEquipamento, int idAquario, TipoEquipamento tipo, String nome, String modelo, String marca, Integer potenciaWatts, Integer vazaoLH, Float lumens, boolean dimensionadoCorretamente){
+        public static EquipamentoResponse from(Equipamento equipamento, boolean dimensionadoCorretamente){
+            return new EquipamentoResponse(equipamento.getIdEquipamento(), equipamento.getAquario().getId(), equipamento.getTipo(), equipamento.getNome(), equipamento.getModelo(), equipamento.getMarca(), equipamento.getPotenciaWatts(), equipamento.getVazaoLH(), equipamento.getLumens(), dimensionadoCorretamente);
+        }
+    }
+
 
     public record DadosRequest(int idAquario, TipoEquipamento tipo, String nome, String modelo, String marca, Integer potenciaWatts, Integer vazaoLH, Float lumens){}
 
@@ -53,30 +57,30 @@ public class EquipamentoController {
         equipamento.setTipo(dados.tipo());
         equipamento.setVazaoLH(dados.vazaoLH());
         
-        equipamentoService.cadastrar(equipamento);
+        Equipamento salvo = equipamentoService.cadastrar(equipamento);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(EquipamentoResponse.from(salvo, dimensionamentoService.estaDimensionadoCorretamente(salvo)));
     }
 
     @GetMapping("/listar-todos")
     public ResponseEntity<List<EquipamentoResponse>> listarTodos(){
         List<Equipamento> equipamentos = equipamentoService.buscarTodos();
 
-        return ResponseEntity.ok(equipamentos.stream().map(EquipamentoResponse::from).toList());
+        return ResponseEntity.ok(equipamentos.stream().map(e -> EquipamentoResponse.from(e, dimensionamentoService.estaDimensionadoCorretamente(e))).toList());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EquipamentoResponse> buscarPorId(@PathVariable int id){
         Equipamento equipamento = equipamentoService.buscarPorId(id);
 
-        return ResponseEntity.ok(EquipamentoResponse.from(equipamento));
+        return ResponseEntity.ok(EquipamentoResponse.from(equipamento, dimensionamentoService.estaDimensionadoCorretamente(equipamento)));
     }
 
     @GetMapping("/aquario/{id}")
     public ResponseEntity<List<EquipamentoResponse>> buscarPorIdAquario(@PathVariable int id){
         List<Equipamento> equipamentos = equipamentoService.listarPorAquarios(id);
 
-        return ResponseEntity.ok(equipamentos.stream().map(EquipamentoResponse::from).toList());
+        return ResponseEntity.ok(equipamentos.stream().map(e -> EquipamentoResponse.from(e, dimensionamentoService.estaDimensionadoCorretamente(e))).toList());
     }
 
     @PutMapping("/{id}")

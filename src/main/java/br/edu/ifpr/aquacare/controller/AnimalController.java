@@ -30,6 +30,13 @@ public class AnimalController {
         this.animalService = animalService;
     }
 
+    public record AnimalResponse(int idAnimal, String nomePopular, String nomeCientifico, String descricao, float tempMin, float tempMax, float phMin, float phMax, Float ghMin, Float ghMax, Float salinidadeMin, Float salinidadeMax, Agressividade agressividade, PadraoTerritorial padraoTerritorial, float tamanhoMedio, RegiaoNado regiaoNado, String habitoAlimentar, Float lc50Amonia, Float lc50Nitrito, Sensibilidade sensibilidadeAmonia, Sensibilidade sensibilidadeNitrito, Sensibilidade sensibilidadeNitrato, Integer quantidadeMinimaGrupo){
+        public static AnimalResponse from(Animal animal){
+            return new AnimalResponse(animal.getIdAnimal(), animal.getNomePopular(), animal.getNomeCientifico(), animal.getDescricao(), animal.getTempMin(), animal.getTempMax(), animal.getPhMin(), animal.getPhMax(), animal.getGhMin(), animal.getGhMax(), animal.getSalinidadeMin(), animal.getSalinidadeMax(), animal.getAgressividade(), animal.getPadraoTerritorial(), animal.getTamanhoMedio(), animal.getRegiaoNado(), animal.getHabitoAlimentar(), animal.getLc50Amonia(), animal.getLc50Nitrito(), animal.getSensibilidadeAmonia(), animal.getSensibilidadeNitrito(), animal.getSensibilidadeNitrato(), animal.getQuantidadeMinimaGrupo());
+    }
+}
+
+
     public record DadosRequest(String nomePopular, String nomeCientifico, String descricao, float tempMin, float tempMax, float phMin, float phMax, Float ghMin, Float ghMax, Float salinidadeMin, Float salinidadeMax, Agressividade agressividade, PadraoTerritorial padraoTerritorial, float tamanhoMedio, RegiaoNado regiaoNado, String habitoAlimentar, Float lc50Amonia, Float lc50Nitrito, Sensibilidade sensibilidadeAmonia, Sensibilidade sensibilidadeNitrito, Sensibilidade sensibilidadeNitrato, Integer quantidadeMinimaGrupo){}
 
     @PostMapping("/cadastrar")
@@ -64,39 +71,39 @@ public class AnimalController {
     }
 
     @GetMapping("/listar-todos")
-    public ResponseEntity<List<Animal>> listarTodos(){
+    public ResponseEntity<List<AnimalResponse>> listarTodos(){
        List<Animal> animais = animalService.buscarTodos();
-       return ResponseEntity.ok(animais);
+       return ResponseEntity.ok(animais.stream().map(AnimalResponse::from).toList());
     } 
     
     @GetMapping("/{id}")
-    public ResponseEntity<Animal> buscarPorId(@PathVariable int id){
+    public ResponseEntity<AnimalResponse> buscarPorId(@PathVariable int id){
         Animal animal = animalService.buscarPorId(id);
-        return ResponseEntity.ok(animal);
+        return ResponseEntity.ok(AnimalResponse.from(animal));
     }
 
     @GetMapping("/nome-popular/{nome}")
-    public ResponseEntity<List<Animal>> buscarPorNomePopular(@PathVariable String nome){
+    public ResponseEntity<List<AnimalResponse>> buscarPorNomePopular(@PathVariable String nome){
         List<Animal> animais = animalService.buscarPorNomePopular(nome);
-        return ResponseEntity.ok(animais);
+        return ResponseEntity.ok(animais.stream().map(AnimalResponse::from).toList());
     }
 
     @GetMapping("/nome-cientifico/{nome}")
-    public ResponseEntity<List<Animal>> buscarPorNomeCientifico(@PathVariable String nome){
+    public ResponseEntity<List<AnimalResponse>> buscarPorNomeCientifico(@PathVariable String nome){
         List<Animal> animais = animalService.buscarPorNomeCientifico(nome);
-        return ResponseEntity.ok(animais);
+        return ResponseEntity.ok(animais.stream().map(AnimalResponse::from).toList());
     }
 
     @GetMapping("/agressividade/{agressividade}")
-    public ResponseEntity<List<Animal>> buscarPorAgressividade(@PathVariable Agressividade agressividade){
+    public ResponseEntity<List<AnimalResponse>> buscarPorAgressividade(@PathVariable Agressividade agressividade){
         List<Animal> animais = animalService.buscarPorAgressividade(agressividade);
-        return ResponseEntity.ok(animais);
+        return ResponseEntity.ok(animais.stream().map(AnimalResponse::from).toList());
     }
 
     @GetMapping("/regiao-nado/{regiaoNado}")
-    public ResponseEntity<List<Animal>> buscarPorRegiaoDeNado(@PathVariable RegiaoNado regiaoNado){
+    public ResponseEntity<List<AnimalResponse>> buscarPorRegiaoDeNado(@PathVariable RegiaoNado regiaoNado){
         List<Animal> animais = animalService.buscarPorRegiaoDeNado(regiaoNado);
-        return ResponseEntity.ok(animais);
+        return ResponseEntity.ok(animais.stream().map(AnimalResponse::from).toList());
     }
 
     @PutMapping("/{id}")

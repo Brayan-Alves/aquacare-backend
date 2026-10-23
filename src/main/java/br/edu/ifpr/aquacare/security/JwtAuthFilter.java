@@ -11,7 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import br.edu.ifpr.aquacare.entity.Usuario;
 import br.edu.ifpr.aquacare.repository.UsuarioRepository;
-
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,16 +32,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if(header != null && header.startsWith("Bearer ")){
-            String token = header.substring(7);
-            String email = tokenService.extrairEmail(token);
 
-            Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+            try {
+                String token = header.substring(7);
+                String email = tokenService.extrairEmail(token);
 
-            if(usuario != null){
-                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRole().name()));
-                var authentication = new UsernamePasswordAuthenticationToken(usuario, null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+                Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+
+                if(usuario != null){
+                    List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRole().name()));
+                    var authentication = new UsernamePasswordAuthenticationToken(usuario, null, authorities);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (JwtException e) {}
+            
 
         }
 

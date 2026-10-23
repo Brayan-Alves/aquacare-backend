@@ -118,10 +118,10 @@ public class AquarioController {
     }
     
     @GetMapping("/{id}/especies-recomendadas")
-    public ResponseEntity<List<Animal>> recomendarEspecies(@PathVariable int id){
+    public ResponseEntity<List<AnimalController.AnimalResponse>> recomendarEspecies(@PathVariable int id){
         List<Animal> animaisRecomendados =  recomendacaoService.sugerirEspecies(id);
 
-        return ResponseEntity.ok(animaisRecomendados);
+        return ResponseEntity.ok(animaisRecomendados.stream().map(AnimalController.AnimalResponse::from).toList());
     }
 
 }
