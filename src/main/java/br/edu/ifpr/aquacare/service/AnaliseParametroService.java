@@ -10,6 +10,7 @@ import br.edu.ifpr.aquacare.entity.AnimalAquario;
 import br.edu.ifpr.aquacare.entity.RegistroParametro;
 import br.edu.ifpr.aquacare.enums.Sensibilidade;
 import br.edu.ifpr.aquacare.enums.Severidade;
+import br.edu.ifpr.aquacare.enums.TipoAgua;
 import br.edu.ifpr.aquacare.repository.AnimalAquarioRepository;
 
 @Service 
@@ -20,6 +21,10 @@ public class AnaliseParametroService {
     private static final float LIMITE_NITRITO_BASE = 0.5f;
     private static final float MASSA_MOLAR_NITRITO = 46.01f;
     private static final float FATOR_SEGURANCA_CL50 = 0.10f;
+    private static final float CALCIO_MIN = 380f;
+    private static final float CALCIO_MAX = 450f;
+    private static final float MAGNESIO_MIN = 1250f;
+    private static final float MAGNESIO_MAX = 1400f;
 
     private final AnimalAquarioRepository animalAquarioRepository;
     private final ToxicidadeService toxicidadeService;
@@ -52,6 +57,26 @@ public class AnaliseParametroService {
             if(nitrito != null && nitrito > limiteNitrito(animal)){
                 alertas.add(new Alerta("Nitrito acima limite seguro para " + animal.getNomePopular() + ".", Severidade.ATENCAO));
             }
+        }
+
+        if(registro.getAquario().getTipoAgua() == TipoAgua.MARINHO){
+            alertas.addAll(analisarCalcioMagnesio(registro));
+        }
+
+        return alertas;
+    }
+
+    private List<Alerta> analisarCalcioMagnesio(RegistroParametro registro){
+        List<Alerta> alertas = new ArrayList<>();
+
+        Float calcio = registro.getCalcio();
+        if(calcio != null && (calcio < CALCIO_MIN || calcio > CALCIO_MAX)){
+            alertas.add(new Alerta("Cálcio fora da faixa de referência para aquários marinhos (380 a 450 ppm).", Severidade.ATENCAO));
+        }
+
+        Float magnesio = registro.getMagnesio();
+        if(magnesio != null && (magnesio < MAGNESIO_MIN || magnesio > MAGNESIO_MAX)){
+            alertas.add(new Alerta("Magnésio fora da faixa de referência para aquários marinhos (1250 a 1400 ppm).", Severidade.ATENCAO));
         }
 
         return alertas;
