@@ -30,7 +30,11 @@ public class DiagnosticoService {
 
     public Diagnostico diagnosticar(int idAquario){
         RegistroParametro registro = registroParametroRepository.findFirstByAquarioIdOrderByDataHoraDesc(idAquario);
-        
+
+        if(registro == null){
+            throw new IllegalArgumentException("O aquário ainda não possui registros de parâmetros para gerar um diagnóstico.");
+        }
+
         List<Alerta> alertas = new ArrayList<>(analiseParametroService.analisar(registro));
         alertas.addAll(verificarGrupos(idAquario));
 
