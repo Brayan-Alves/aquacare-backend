@@ -1,18 +1,21 @@
 package br.edu.ifpr.aquacare.controller;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import br.edu.ifpr.aquacare.entity.Animal;
 import br.edu.ifpr.aquacare.entity.Aquario;
@@ -21,8 +24,8 @@ import br.edu.ifpr.aquacare.enums.NivelPlanta;
 import br.edu.ifpr.aquacare.enums.TipoAgua;
 import br.edu.ifpr.aquacare.service.AquarioService;
 import br.edu.ifpr.aquacare.service.DiagnosticoService;
-import br.edu.ifpr.aquacare.service.RecomendacaoService;
 import br.edu.ifpr.aquacare.service.DiagnosticoService.Diagnostico;
+import br.edu.ifpr.aquacare.service.RecomendacaoService;
 import br.edu.ifpr.aquacare.service.RecomendacaoService.ParametrosIdeais;;
 
 @RestController
@@ -71,9 +74,13 @@ public class AquarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AquarioResponse> buscarPorId(@PathVariable  int id){
+    public ResponseEntity<AquarioResponse> buscarPorId(@PathVariable  int id, @AuthenticationPrincipal Usuario usuario){
         Aquario aquario = aquarioService.buscarPorId(id);
+        if(!aquario.getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você");
+        }
         return ResponseEntity.ok(AquarioResponse.from(aquario));
+
     }
 
     @GetMapping("/meus")
@@ -83,7 +90,7 @@ public class AquarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@RequestBody DadosRequest dados, @PathVariable  int id){
+    public ResponseEntity<Void> atualizar(@RequestBody DadosRequest dados, @PathVariable  int id, @AuthenticationPrincipal Usuario usuario){
         Aquario aquario = new Aquario();
 
         aquario.setNome(dados.nome());
@@ -93,32 +100,49 @@ public class AquarioController {
         aquario.setCiclado(dados.isCiclado());
         aquario.setInjecaoCO2(dados.injecaoCO2());
 
+        if(!aquarioService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você");
+        }
+
         aquarioService.atualizar(id, aquario);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable int id){
+    public ResponseEntity<Void> excluir(@PathVariable int id, @AuthenticationPrincipal  Usuario usuario){
+        if(!aquarioService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você");
+        }
         aquarioService.excluir(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/diagnostico")
-    public ResponseEntity<Diagnostico> diagnosticar(@PathVariable int id){
+    public ResponseEntity<Diagnostico> diagnosticar(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!aquarioService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você");
+        }
+        
         Diagnostico diagnostico = diagnosticoService.diagnosticar(id);
 
         return ResponseEntity.ok(diagnostico);
     }
 
     @GetMapping("/{id}/parametros-ideais") 
-    public ResponseEntity<ParametrosIdeais> recomendarParametros(@PathVariable int id){
+    public ResponseEntity<ParametrosIdeais> recomendarParametros(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!aquarioService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você");
+        }
         ParametrosIdeais parametros = recomendacaoService.sugerirParametrosIdeais(id);
 
         return ResponseEntity.ok(parametros);
     }
     
     @GetMapping("/{id}/especies-recomendadas")
-    public ResponseEntity<List<AnimalController.AnimalResponse>> recomendarEspecies(@PathVariable int id){
+    public ResponseEntity<List<AnimalController.AnimalResponse>> recomendarEspecies(@PathVariable int id,@AuthenticationPrincipal Usuario usuario){
+        if(!aquarioService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você");
+        }
         List<Animal> animaisRecomendados =  recomendacaoService.sugerirEspecies(id);
 
         return ResponseEntity.ok(animaisRecomendados.stream().map(AnimalController.AnimalResponse::from).toList());

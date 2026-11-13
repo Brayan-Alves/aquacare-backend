@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,22 +53,37 @@ public class LembreteController {
         lembrete.setNotificado(dados.notificado());
         lembrete.setTitulo(dados.titulo());
 
+        if(!lembrete.getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse lembrete não pertence a você");
+        }
+
         lembreteService.cadastrar(lembrete);
+
+
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LembreteResponse> buscraPorId(@PathVariable int id){
+    public ResponseEntity<LembreteResponse> buscraPorId(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
         Lembrete lembrete = lembreteService.buscarPorId(id);
+
+
+        if(!lembrete.getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse lembrete não pertence a você");
+        }
 
         return ResponseEntity.ok(LembreteResponse.from(lembrete));
     }
 
     @GetMapping("/aquario/{id}")
-    public ResponseEntity<List<LembreteResponse>> buscarPorIdAquario(@PathVariable int id){
+    public ResponseEntity<List<LembreteResponse>> buscarPorIdAquario(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
         List<Lembrete> lembretes = lembreteService.listarPorAquario(id);
+
+        if(!aquarioService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esses aquário não pertence a você.");
+        }
 
         return ResponseEntity.ok(lembretes.stream().map(LembreteResponse::from).toList());
     }
@@ -80,7 +96,7 @@ public class LembreteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizae(@PathVariable  int id, @RequestBody DadosRequest dados){
+    public ResponseEntity<Void> atualiza(@PathVariable  int id, @RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
         Lembrete lembrete = new Lembrete();
 
         lembrete.setConcluido(dados.concluido());
@@ -88,13 +104,21 @@ public class LembreteController {
         lembrete.setNotificado(dados.notificado());
         lembrete.setTitulo(dados.titulo());
 
+        if(!lembreteService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse lmebrete não pertence a você.");
+        }
+
         lembreteService.atualizar(id, lembrete);
 
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable int id){
+    public ResponseEntity<Void> excluir(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+
+        if(!lembreteService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse lmebrete não pertence a você.");
+        }
         lembreteService.excluir(id);
 
         return ResponseEntity.noContent().build();
