@@ -11,20 +11,23 @@ import br.edu.ifpr.aquacare.entity.Aquario;
 import br.edu.ifpr.aquacare.entity.AnimalAquario;
 import br.edu.ifpr.aquacare.entity.RegistroParametro;
 import br.edu.ifpr.aquacare.enums.EstadoAquario;
+import br.edu.ifpr.aquacare.enums.Parametro;
 import br.edu.ifpr.aquacare.enums.Severidade;
 import br.edu.ifpr.aquacare.repository.AnimalAquarioRepository;
 import br.edu.ifpr.aquacare.repository.RegistroParametroRepository;
 
-@Service 
+@Service
 public class DiagnosticoService {
-    
+
     private final RegistroParametroRepository registroParametroRepository;
     private final AnimalAquarioRepository animalAquarioRepository;
     private final AnaliseParametroService analiseParametroService;
     private final CompatibilidadeService compatibilidadeService;
     private final AquarioService aquarioService;
 
-    public DiagnosticoService(RegistroParametroRepository registroParametroRepository, AnimalAquarioRepository animalAquarioRepository, AnaliseParametroService analiseParametroService, CompatibilidadeService compatibilidadeService, AquarioService aquarioService){
+    public DiagnosticoService(RegistroParametroRepository registroParametroRepository,
+            AnimalAquarioRepository animalAquarioRepository, AnaliseParametroService analiseParametroService,
+            CompatibilidadeService compatibilidadeService, AquarioService aquarioService) {
         this.registroParametroRepository = registroParametroRepository;
         this.animalAquarioRepository = animalAquarioRepository;
         this.analiseParametroService = analiseParametroService;
@@ -32,48 +35,57 @@ public class DiagnosticoService {
         this.aquarioService = aquarioService;
     }
 
-    public record Diagnostico(EstadoAquario estado, List<Alerta> alertas){}
+    public record Diagnostico(EstadoAquario estado, List<Alerta> alertas) {
+    }
 
-    public Diagnostico diagnosticar(int idAquario){
+    public Diagnostico diagnosticar(int idAquario) {
         RegistroParametro registro = registroParametroRepository.findFirstByAquarioIdOrderByDataHoraDesc(idAquario);
         Aquario aquario = aquarioService.buscarPorId(idAquario);
 
-        
-        if(registro == null){
-            throw new IllegalArgumentException("O aquário ainda não possui registros de parâmetros para gerar um diagnóstico.");
+        if (registro == null) {
+            throw new IllegalArgumentException(
+                    "O aquário ainda não possui registros de parâmetros para gerar um diagnóstico.");
         }
 
         List<Alerta> alertas = new ArrayList<>(analiseParametroService.analisar(registro));
         alertas.addAll(verificarGrupos(idAquario));
         alertas.addAll(verificarCompatibilidade(idAquario));
 
-        int diasMontagem = (int) java.time.temporal.ChronoUnit.DAYS.between(aquario.getDataMontagem(), LocalDateTime.now());
-        if(!aquario.isCiclado() && diasMontagem < 30){
-            alertas.add(new Alerta("Aquário em ciclagem (dia " + diasMontagem + " de 30): evite adicionar peixes; amônia e nitrito altos são esperados nesta fase.", Severidade.ATENCAO));
+        int diasMontagem = (int) java.time.temporal.ChronoUnit.DAYS.between(aquario.getDataMontagem(),
+                LocalDateTime.now());
+        if (!aquario.isCiclado() && diasMontagem < 30) {
+            alertas.add(new Alerta(Parametro.CICLAGEM,
+                    "Aquário em ciclagem (dia " + diasMontagem
+                            + " de 30): evite adicionar peixes; amônia e nitrito altos são esperados nesta fase.",
+                    Severidade.ATENCAO,
+                    "Monitore amônia e nitrito de perto; evite adicionar novos animais até a ciclagem terminar."));
         }
-        
+
         EstadoAquario estado = classificar(alertas);
 
         return new Diagnostico(estado, alertas);
     }
 
-    private List<Alerta> verificarGrupos(int idAquario){
+    private List<Alerta> verificarGrupos(int idAquario) {
         List<Alerta> alertas = new ArrayList<>();
         List<AnimalAquario> associados = animalAquarioRepository.findByAquarioId(idAquario);
 
         for (AnimalAquario animalAquario : associados) {
             Animal animal = animalAquario.getAnimal();
 
-            if(animal.getQuantidadeMinimaGrupo() != null && animalAquario.getQuantidade() < animal.getQuantidadeMinimaGrupo()){
-                alertas.add(new Alerta(animal.getNomePopular() + " está abaixo do grupo mínimo recomendado.", Severidade.ATENCAO));
+            if (animal.getQuantidadeMinimaGrupo() != null
+                    && animalAquario.getQuantidade() < animal.getQuantidadeMinimaGrupo()) {
+                alertas.add(new Alerta(Parametro.GRUPO,
+                        animal.getNomePopular() + " está abaixo do grupo mínimo recomendado.", Severidade.ATENCAO,
+                        "Considere adicionar mais indivíduos dessa espécie para atingir o grupo mínimo recomendado, ou reavalie se essa espécie é adequada pro seu aquário."));
             }
         }
 
         return alertas;
     }
 
-    private EstadoAquario classificar(List<Alerta> alertas){
-        if(alertas.isEmpty()){
+    private EstadoAquario classificar(List<Alerta> alertas) {
+        if (alertas.isEmpty()) {
             return EstadoAquario.SAUDAVEL;
         }
 
@@ -81,16 +93,16 @@ public class DiagnosticoService {
         return temCritico ? EstadoAquario.CRITICO : EstadoAquario.ATENCAO;
     }
 
-    private List<Alerta> verificarCompatibilidade(int idAquario){
+    private List<Alerta> verificarCompatibilidade(int idAquario) {
         List<Alerta> alertas = new ArrayList<>();
         List<AnimalAquario> associados = animalAquarioRepository.findByAquarioId(idAquario);
 
-        for(int i = 0; i < associados.size(); i++){
-            for(int j = i + 1; j < associados.size(); j++){
+        for (int i = 0; i < associados.size(); i++) {
+            for (int j = i + 1; j < associados.size(); j++) {
                 Animal a = associados.get(i).getAnimal();
                 Animal b = associados.get(j).getAnimal();
-                if(a.getIdAnimal() != b.getIdAnimal() && !compatibilidadeService.saoCompativeis(a, b)){
-                    alertas.add(new Alerta(a.getNomePopular() + " pode ser incompatível com " + b.getNomePopular() + ".", Severidade.ATENCAO));
+                if (a.getIdAnimal() != b.getIdAnimal() && !compatibilidadeService.saoCompativeis(a, b)) {
+                    alertas.add(new Alerta(Parametro.COMPATIBILIDADE, a.getNomePopular() + " pode ser incompatível com " + b.getNomePopular() + ".", Severidade.ATENCAO, "Observe o comportamento dos animais de perto; considere separar as espécies em aquários diferentes se houver sinais de estresse ou agressão."));
                 }
             }
         }

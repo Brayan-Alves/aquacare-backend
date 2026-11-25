@@ -24,6 +24,7 @@ import br.edu.ifpr.aquacare.service.AnimalService;
 import br.edu.ifpr.aquacare.service.AquarioService;
 import br.edu.ifpr.aquacare.entity.AnimalAquario;
 import br.edu.ifpr.aquacare.entity.Usuario;
+import br.edu.ifpr.aquacare.enums.Parametro;
 import br.edu.ifpr.aquacare.enums.Severidade;
 
 
@@ -67,8 +68,7 @@ public class AnimalAquarioController {
         List<Alerta> alertas = new ArrayList<>();
         int diasMontagem = (int) java.time.temporal.ChronoUnit.DAYS.between(animalAquario.getAquario().getDataMontagem(), LocalDateTime.now());
         if(!animalAquario.getAquario().isCiclado() && diasMontagem < 30){
-            alertas.add(new Alerta("Aquário em ciclagem (dia " + diasMontagem + " de 30): evite adicionar peixes agora.", Severidade.ATENCAO));
-        }
+        alertas.add(new Alerta(Parametro.CICLAGEM, "Aquário em ciclagem (dia " + diasMontagem + " de 30): evite adicionar peixes agora.", Severidade.ATENCAO, "Monitore amônia e nitrito de perto nesta fase; evite adicionar novos animais até a ciclagem terminar."));        }
         
         
         animalAquario.setQuantidade(dados.quantidade());
