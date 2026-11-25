@@ -22,7 +22,12 @@ public class AnimalAquarioService {
     }
 
     public AnimalAquario associar(AnimalAquario animalAquario){
-        return animalAquarioRepository.save(animalAquario);
+        return animalAquarioRepository.findByAquarioIdAndAnimalIdAnimal(animalAquario.getAquario().getId(), animalAquario.getAnimal().getIdAnimal())
+            .map(existente -> {
+                existente.setQuantidade(existente.getQuantidade() + animalAquario.getQuantidade());
+                return animalAquarioRepository.save(existente);
+            })
+            .orElseGet(() -> animalAquarioRepository.save(animalAquario));
     }
 
     public List<AnimalAquario> listarPorAquario(int idAquario){
