@@ -12,11 +12,9 @@ import jakarta.persistence.EntityNotFoundException;
 public class AnimalAquarioService {
     
     private final AnimalAquarioRepository animalAquarioRepository;
-    private final CompatibilidadeService compatibilidadeService;
 
-    public AnimalAquarioService(AnimalAquarioRepository animalAquarioRepository, CompatibilidadeService compatibilidadeService){
+    public AnimalAquarioService(AnimalAquarioRepository animalAquarioRepository){
         this.animalAquarioRepository = animalAquarioRepository;
-        this.compatibilidadeService = compatibilidadeService;
     }
 
     public AnimalAquario buscarPorId(int id){
@@ -24,7 +22,6 @@ public class AnimalAquarioService {
     }
 
     public AnimalAquario associar(AnimalAquario animalAquario){
-        compatibilidadeService.validarNovoAnimal(animalAquario.getAquario().getId(), animalAquario.getAnimal());
         return animalAquarioRepository.save(animalAquario);
     }
 

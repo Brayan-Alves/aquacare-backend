@@ -38,6 +38,9 @@ public class AnaliseParametroService {
         List<Alerta> alertas = new ArrayList<>();
         List<AnimalAquario> animaisAssociados = animalAquarioRepository.findByAquarioId(registro.getAquario().getId());
 
+        if(animaisAssociados.isEmpty()){
+            alertas.add(new Alerta("Cadastre espécies para receber análises.", Severidade.ATENCAO));
+        }
         for (AnimalAquario animalAquario : animaisAssociados) {
             Animal animal = animalAquario.getAnimal();
 

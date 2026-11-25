@@ -118,7 +118,31 @@ public class CompatibilidadeService{
             return  false;
         }
 
-
-
     }
+
+    public boolean saoCompativeis(Animal a, Animal b){
+    if(faixasIncompativeis(a.getPhMin(), a.getPhMax(), b.getPhMin(), b.getPhMax())){
+        return false;
+    }
+    if(faixasIncompativeis(a.getTempMin(), a.getTempMax(), b.getTempMin(), b.getTempMax())){
+        return false;
+    }
+    if(a.getGhMin() != null && a.getGhMax() != null && b.getGhMin() != null && b.getGhMax() != null && faixasIncompativeis(a.getGhMin(), a.getGhMax(), b.getGhMin(), b.getGhMax())){
+        return false;
+    }   
+    if(a.getSalinidadeMin() != null && a.getSalinidadeMax() != null && b.getSalinidadeMin() != null && b.getSalinidadeMax() != null && faixasIncompativeis(a.getSalinidadeMin(), a.getSalinidadeMax(), b.getSalinidadeMin(), b.getSalinidadeMax())){
+        return false;   
+    }
+
+    if(agressividadeIncompativel(a, b)){
+        return false;
+    }
+    if(territorialismoIncompativel(a, b)){
+        return false;
+    }
+    if(riscoPredacao(a, b)){
+        return false;
+    }
+    return true;
+}
 }

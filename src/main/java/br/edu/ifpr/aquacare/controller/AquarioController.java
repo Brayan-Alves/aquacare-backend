@@ -44,9 +44,11 @@ public class AquarioController {
 
     public record DadosRequest(String nome, float litragem, TipoAgua tipoAgua, NivelPlanta nivelPlantas, boolean isCiclado, boolean injecaoCO2){}
 
-    public record AquarioResponse(int id, String nome, float litragem, TipoAgua tipoAgua, NivelPlanta nivelPlantas, LocalDateTime dataMontagem, boolean isCiclado, boolean injecaoCO2){
+    public record AquarioResponse(int id, String nome, float litragem, TipoAgua tipoAgua, NivelPlanta nivelPlantas, LocalDateTime dataMontagem, boolean isCiclado, boolean injecaoCO2, boolean emCiclagem, int diasMontagem){
         public static AquarioResponse from(Aquario aquario){
-            return new AquarioResponse(aquario.getId(), aquario.getNome(), aquario.getLitragem(), aquario.getTipoAgua(), aquario.getNivelPlantas(), aquario.getDataMontagem(), aquario.isCiclado(), aquario.isInjecaoCO2());
+            int dias = (int) java.time.temporal.ChronoUnit.DAYS.between(aquario.getDataMontagem(), LocalDateTime.now());
+            boolean emCiclagem = !aquario.isCiclado() && dias < 30;
+            return new AquarioResponse(aquario.getId(), aquario.getNome(), aquario.getLitragem(), aquario.getTipoAgua(), aquario.getNivelPlantas(), aquario.getDataMontagem(), aquario.isCiclado(), aquario.isInjecaoCO2(), emCiclagem, dias);
     }
 }
 

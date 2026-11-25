@@ -1,6 +1,8 @@
 package br.edu.ifpr.aquacare.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -17,10 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import br.edu.ifpr.aquacare.service.AnimalAquarioService;
+import br.edu.ifpr.aquacare.service.Alerta;
 import br.edu.ifpr.aquacare.service.AnimalService;
 import br.edu.ifpr.aquacare.service.AquarioService;
 import br.edu.ifpr.aquacare.entity.AnimalAquario;
 import br.edu.ifpr.aquacare.entity.Usuario;
+import br.edu.ifpr.aquacare.enums.Severidade;
+
 
 @RestController 
 @RequestMapping("/animal-aquario")
@@ -47,22 +52,30 @@ public class AnimalAquarioController {
     public record DadosRequest(int idAnimal, int idAquario, int quantidade){}
 
     @PostMapping("/associar")
-    public ResponseEntity<Void> associar(@RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
+    public ResponseEntity<List<Alerta>> associar(@RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
         AnimalAquario animalAquario = new AnimalAquario();
 
 
         animalAquario.setAnimal(animalService.buscarPorId(dados.idAnimal()));
         animalAquario.setAquario(aquarioService.buscarPorId(dados.idAquario()));
 
+        
         if(!animalAquario.getAquario().getUsuario().getId().equals(usuario.getId())){
             throw new AccessDeniedException("Esse aquário não pertence a você.");
         }
 
+        List<Alerta> alertas = new ArrayList<>();
+        int diasMontagem = (int) java.time.temporal.ChronoUnit.DAYS.between(animalAquario.getAquario().getDataMontagem(), LocalDateTime.now());
+        if(!animalAquario.getAquario().isCiclado() && diasMontagem < 30){
+            alertas.add(new Alerta("Aquário em ciclagem (dia " + diasMontagem + " de 30): evite adicionar peixes agora.", Severidade.ATENCAO));
+        }
+        
+        
         animalAquario.setQuantidade(dados.quantidade());
 
         animalAquarioService.associar(animalAquario);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(alertas);
     }
 
     @GetMapping("/{id}")
