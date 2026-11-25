@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +20,7 @@ import br.edu.ifpr.aquacare.service.AnimalAquarioService;
 import br.edu.ifpr.aquacare.service.AnimalService;
 import br.edu.ifpr.aquacare.service.AquarioService;
 import br.edu.ifpr.aquacare.entity.AnimalAquario;
+import br.edu.ifpr.aquacare.entity.Usuario;
 
 @RestController 
 @RequestMapping("/animal-aquario")
@@ -44,11 +47,17 @@ public class AnimalAquarioController {
     public record DadosRequest(int idAnimal, int idAquario, int quantidade){}
 
     @PostMapping("/associar")
-    public ResponseEntity<Void> associar(@RequestBody DadosRequest dados){
+    public ResponseEntity<Void> associar(@RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
         AnimalAquario animalAquario = new AnimalAquario();
+
 
         animalAquario.setAnimal(animalService.buscarPorId(dados.idAnimal()));
         animalAquario.setAquario(aquarioService.buscarPorId(dados.idAquario()));
+
+        if(!animalAquario.getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
+
         animalAquario.setQuantidade(dados.quantidade());
 
         animalAquarioService.associar(animalAquario);
@@ -57,29 +66,42 @@ public class AnimalAquarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AnimalAquarioResponse> buscarPorId(@PathVariable int id){
+    public ResponseEntity<AnimalAquarioResponse> buscarPorId(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!animalAquarioService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         AnimalAquario animalAquario = animalAquarioService.buscarPorId(id);
         
         return ResponseEntity.ok(AnimalAquarioResponse.from(animalAquario));
     }
 
     @GetMapping("/aquario/{id}")
-    public ResponseEntity<List<AnimalAquarioResponse>> buscarPorIdAquario(@PathVariable int id){
+    public ResponseEntity<List<AnimalAquarioResponse>> buscarPorIdAquario(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!aquarioService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         List<AnimalAquario> animais = animalAquarioService.listarPorAquario(id);
 
         return ResponseEntity.ok(animais.stream().map(AnimalAquarioResponse::from).toList());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@RequestBody  DadosRequest dados, @PathVariable int id){
+    public ResponseEntity<Void> atualizar(@RequestBody  DadosRequest dados, @PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!animalAquarioService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         animalAquarioService.atualizar(id, dados.quantidade());
 
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable  int id){
+    public ResponseEntity<Void> excluir(@PathVariable  int id, @AuthenticationPrincipal Usuario usuario){
+        if(!animalAquarioService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         animalAquarioService.excluir(id);
+
 
         return ResponseEntity.noContent().build();
     }

@@ -52,6 +52,9 @@ public class EquipamentoController {
         Equipamento equipamento = new Equipamento();
 
         equipamento.setAquario(aquarioService.buscarPorId(dados.idAquario()));
+        if(!equipamento.getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse Aquário não pertence a você.");
+        }
         equipamento.setLumens(dados.lumens());
         equipamento.setMarca(dados.marca());
         equipamento.setModelo(dados.modelo());
@@ -60,9 +63,6 @@ public class EquipamentoController {
         equipamento.setTipo(dados.tipo());
         equipamento.setVazaoLH(dados.vazaoLH());
 
-        if(!equipamento.getAquario().getUsuario().getId().equals(usuario.getId())){
-            throw new AccessDeniedException("Esse Aquário não pertence a você.");
-        }
         
         Equipamento salvo = equipamentoService.cadastrar(equipamento);
 

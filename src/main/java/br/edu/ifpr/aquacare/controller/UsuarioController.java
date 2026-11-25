@@ -6,6 +6,7 @@ import br.edu.ifpr.aquacare.enums.Role;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,7 +81,11 @@ public class UsuarioController {
         return ResponseEntity.ok(UsuarioResponse.from(usuario));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@PathVariable  String id, @Valid @RequestBody AtualizarContaRequest dados){
+    public ResponseEntity<Void> atualizar(@PathVariable  String id, @Valid @RequestBody AtualizarContaRequest dados, @AuthenticationPrincipal  Usuario usuario){
+
+        if(!usuario.getId().equals(id)){
+            throw new AccessDeniedException("Você só pode alterar/excluir sua conta!");
+        }
         Usuario dadosAtualizados = new Usuario();
         dadosAtualizados.setNome(dados.nome());
         dadosAtualizados.setEmail(dados.email());    
@@ -90,7 +95,10 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable String id){
+    public ResponseEntity<Void> excluir(@PathVariable String id, @AuthenticationPrincipal Usuario usuario){
+        if(!usuario.getId().equals(id)){
+            throw new AccessDeniedException("Você só pode alterar/excluir sua conta!");
+        }
         usuarioService.excluir(id);
         return ResponseEntity.noContent().build();
     }

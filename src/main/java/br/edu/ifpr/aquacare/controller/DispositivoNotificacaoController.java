@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +52,10 @@ public class DispositivoNotificacaoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DispositivoNotificacaoResponse> buscarPorId(@PathVariable  int id){
+    public ResponseEntity<DispositivoNotificacaoResponse> buscarPorId(@PathVariable  int id, @AuthenticationPrincipal Usuario usuario){
+        if(!dispositivoNotificacaoService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse dispositivo não pertence a você.");
+        }
         DispositivoNotificacao dispositivo = dispositivoNotificacaoService.buscarPorId(id);
 
         return ResponseEntity.ok(DispositivoNotificacaoResponse.from(dispositivo));
@@ -65,7 +69,10 @@ public class DispositivoNotificacaoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@PathVariable int id, @RequestBody DadosRequest dados){
+    public ResponseEntity<Void> atualizar(@PathVariable int id, @RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
+        if(!dispositivoNotificacaoService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse dispositivo não pertence a você.");
+        }
         DispositivoNotificacao dispositivo = new DispositivoNotificacao();
 
         dispositivo.setExpoPushToken(dados.expoPushToken());
@@ -76,7 +83,10 @@ public class DispositivoNotificacaoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable int id){
+    public ResponseEntity<Void> excluir(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!dispositivoNotificacaoService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse dispositivo não pertence a você.");
+        }
         dispositivoNotificacaoService.excluir(id);
 
         return ResponseEntity.noContent().build();

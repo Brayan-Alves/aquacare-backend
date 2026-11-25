@@ -1,10 +1,13 @@
 package br.edu.ifpr.aquacare.controller;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.ifpr.aquacare.entity.RegistroParametro;
+import br.edu.ifpr.aquacare.entity.Usuario;
 import br.edu.ifpr.aquacare.service.AquarioService;
 
 import br.edu.ifpr.aquacare.service.Alerta;
@@ -45,11 +49,17 @@ public class RegistroParametroController {
     public record DadosRequest(int idAquario, float ph, float temperatura, float amonia, Float nitrato, Float nitrito, Float gh, Float kh, Float co2, Float salinidade, Float calcio, Float magnesio){}
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<List<Alerta>> cadastrar(@RequestBody DadosRequest dados){
+    public ResponseEntity<List<Alerta>> cadastrar(@RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
+        
         RegistroParametro registro = new RegistroParametro();
 
         registro.setAmonia(dados.amonia());
         registro.setAquario(aquarioService.buscarPorId(dados.idAquario()));
+
+        if(!registro.getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
+
         registro.setCalcio(dados.calcio());
         registro.setCo2(dados.co2());
         registro.setGh(dados.gh());
@@ -68,21 +78,30 @@ public class RegistroParametroController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RegistroParametroResponse> buscarPorId(@PathVariable int id){
+    public ResponseEntity<RegistroParametroResponse> buscarPorId(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!registroParametroService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse registro não pertence a você.");
+        }
         RegistroParametro registro = registroParametroService.buscarPorId(id);
 
         return ResponseEntity.ok(RegistroParametroResponse.from(registro));
     }
 
     @GetMapping("/aquario/{id}")
-    public ResponseEntity<List<RegistroParametroResponse>> buscarPorIdAquario(@PathVariable int id){
+    public ResponseEntity<List<RegistroParametroResponse>> buscarPorIdAquario(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!aquarioService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         List<RegistroParametro> registro = registroParametroService.buscarPorIdAquario(id);
 
         return ResponseEntity.ok(registro.stream().map(RegistroParametroResponse::from).toList());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@PathVariable int id, @RequestBody DadosRequest dados){
+    public ResponseEntity<Void> atualizar(@PathVariable int id, @RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
+        if(!registroParametroService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse registro não pertence a você.");
+        }
         RegistroParametro registro = new RegistroParametro();
 
         registro.setAmonia(dados.amonia());
@@ -103,7 +122,10 @@ public class RegistroParametroController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable int id){
+    public ResponseEntity<Void> excluir(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!registroParametroService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse registro não pertence a você.");
+        }
         registroParametroService.excluir(id);
 
         return ResponseEntity.noContent().build();

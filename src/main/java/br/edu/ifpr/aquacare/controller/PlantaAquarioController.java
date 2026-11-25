@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +20,7 @@ import br.edu.ifpr.aquacare.service.PlantaAquarioService;
 import br.edu.ifpr.aquacare.service.PlantaService;
 import br.edu.ifpr.aquacare.service.AquarioService;
 import br.edu.ifpr.aquacare.entity.PlantaAquario;
+import br.edu.ifpr.aquacare.entity.Usuario;
 
 @RestController 
 @RequestMapping("/planta-aquario")
@@ -43,10 +46,14 @@ public class PlantaAquarioController {
     }
 
     @PostMapping("/associar")
-    public ResponseEntity<Void> associar(@RequestBody DadosRequest dados){
+    public ResponseEntity<Void> associar(@RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
+        
         PlantaAquario plantaAquario = new PlantaAquario();
-
+        
         plantaAquario.setAquario(aquarioService.buscarPorId(dados.idAquario()));
+        if(!plantaAquario.getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         plantaAquario.setPlanta(plantaService.buscarPorId(dados.idPlanta()));
         plantaAquario.setQuantidade(dados.quantidade());
 
@@ -56,28 +63,40 @@ public class PlantaAquarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlantaAquarioResponse> buscarPorId(@PathVariable int id){
+    public ResponseEntity<PlantaAquarioResponse> buscarPorId(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!plantaAquarioService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         PlantaAquario plantaAquario = plantaAquarioService.buscarPorId(id);
 
         return ResponseEntity.ok(PlantaAquarioResponse.from(plantaAquario));
     }
 
     @GetMapping("/aquario/{id}")
-    public ResponseEntity<List<PlantaAquarioResponse>> listarPorIdAqauario(@PathVariable int id){
+    public ResponseEntity<List<PlantaAquarioResponse>> listarPorIdAqauario(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!aquarioService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         List<PlantaAquario> plantas = plantaAquarioService.listarPorAquario(id);
 
         return ResponseEntity.ok(plantas.stream().map(PlantaAquarioResponse::from).toList());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@PathVariable int id, @RequestBody DadosRequest dados){
+    public ResponseEntity<Void> atualizar(@PathVariable int id, @RequestBody DadosRequest dados, @AuthenticationPrincipal Usuario usuario){
+        if(!plantaAquarioService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         plantaAquarioService.atualizar(id, dados.quantidade());
 
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable int id){
+    public ResponseEntity<Void> excluir(@PathVariable int id, @AuthenticationPrincipal Usuario usuario){
+        if(!plantaAquarioService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())){
+            throw new AccessDeniedException("Esse aquário não pertence a você.");
+        }
         plantaAquarioService.excluir(id);
         
         return ResponseEntity.noContent().build();
