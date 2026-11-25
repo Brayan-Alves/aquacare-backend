@@ -21,7 +21,6 @@ import br.edu.ifpr.aquacare.entity.Usuario;
 import br.edu.ifpr.aquacare.enums.Parametro;
 import br.edu.ifpr.aquacare.repository.AlertaRegistroRepository;
 import br.edu.ifpr.aquacare.service.AquarioService;
-import br.edu.ifpr.aquacare.enums.Parametro;
 import br.edu.ifpr.aquacare.enums.Severidade;
 
 import br.edu.ifpr.aquacare.service.Alerta;
