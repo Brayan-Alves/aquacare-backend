@@ -42,7 +42,7 @@ public class AquarioController {
         this.recomendacaoService = recomendacaoService;
     }
 
-    public record DadosRequest(String nome, float litragem, TipoAgua tipoAgua, NivelPlanta nivelPlanta, boolean isCiclado, boolean injecaoCO2){}
+    public record DadosRequest(String nome, float litragem, TipoAgua tipoAgua, NivelPlanta nivelPlantas, boolean isCiclado, boolean injecaoCO2){}
 
     public record AquarioResponse(int id, String nome, float litragem, TipoAgua tipoAgua, NivelPlanta nivelPlantas, LocalDateTime dataMontagem, boolean isCiclado, boolean injecaoCO2){
         public static AquarioResponse from(Aquario aquario){
@@ -59,7 +59,7 @@ public class AquarioController {
         aquario.setUsuario(usuario);
         aquario.setLitragem(dados.litragem());
         aquario.setTipoAgua(dados.tipoAgua());
-        aquario.setNivelPlantas(dados.nivelPlanta());
+        aquario.setNivelPlantas(dados.nivelPlantas());
         aquario.setCiclado(dados.isCiclado());
         aquario.setInjecaoCO2(dados.injecaoCO2());
 
@@ -96,7 +96,7 @@ public class AquarioController {
         aquario.setNome(dados.nome());
         aquario.setLitragem(dados.litragem());
         aquario.setTipoAgua(dados.tipoAgua());
-        aquario.setNivelPlantas(dados.nivelPlanta());
+        aquario.setNivelPlantas(dados.nivelPlantas());
         aquario.setCiclado(dados.isCiclado());
         aquario.setInjecaoCO2(dados.injecaoCO2());
 
