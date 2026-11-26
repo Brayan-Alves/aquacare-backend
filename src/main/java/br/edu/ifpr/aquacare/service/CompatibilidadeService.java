@@ -14,135 +14,178 @@ import br.edu.ifpr.aquacare.repository.AnimalAquarioRepository;
 import br.edu.ifpr.aquacare.repository.PlantaAquarioRepository;
 
 @Service
-public class CompatibilidadeService{
+public class CompatibilidadeService {
 
     private static final float RAZAO_PREDACAO_MAXIMA = 3f;
 
     private final AnimalAquarioRepository animalAquarioRepository;
     private final PlantaAquarioRepository plantaAquarioRepository;
 
-    public CompatibilidadeService(AnimalAquarioRepository animalAquarioRepository, PlantaAquarioRepository plantaAquarioRepository){
+    public CompatibilidadeService(AnimalAquarioRepository animalAquarioRepository,
+            PlantaAquarioRepository plantaAquarioRepository) {
         this.animalAquarioRepository = animalAquarioRepository;
         this.plantaAquarioRepository = plantaAquarioRepository;
     }
 
-    private boolean faixasIncompativeis(float min1, float max1, float min2, float max2){
-        return Math.max(min1,min2) > Math.min(max1,max2);
+    private boolean faixasIncompativeis(float min1, float max1, float min2, float max2) {
+        return Math.max(min1, min2) > Math.min(max1, max2);
     }
 
-    private boolean agressividadeIncompativel(Animal existente, Animal novoAnimal){
+    private boolean agressividadeIncompativel(Animal existente, Animal novoAnimal) {
         return existente.getRegiaoNado() == novoAnimal.getRegiaoNado()
-            && (existente.getAgressividade() == Agressividade.AGRESSIVO || novoAnimal.getAgressividade() == Agressividade.AGRESSIVO);
+                && (existente.getAgressividade() == Agressividade.AGRESSIVO
+                        || novoAnimal.getAgressividade() == Agressividade.AGRESSIVO);
     }
 
-    private boolean territorialismoIncompativel(Animal existente, Animal novoAnimal){
+    private boolean territorialismoIncompativel(Animal existente, Animal novoAnimal) {
         return existente.getRegiaoNado() == novoAnimal.getRegiaoNado()
-            && existente.getPadraoTerritorial() == PadraoTerritorial.TERRITORIAL
-            && novoAnimal.getPadraoTerritorial() == PadraoTerritorial.TERRITORIAL;
+                && existente.getPadraoTerritorial() == PadraoTerritorial.TERRITORIAL
+                && novoAnimal.getPadraoTerritorial() == PadraoTerritorial.TERRITORIAL;
     }
 
-    private boolean riscoPredacao(Animal existente, Animal novoAnimal){
+    private boolean riscoPredacao(Animal existente, Animal novoAnimal) {
         float maior = Math.max(existente.getTamanhoMedio(), novoAnimal.getTamanhoMedio());
         float menor = Math.min(existente.getTamanhoMedio(), novoAnimal.getTamanhoMedio());
         return (maior / menor) >= RAZAO_PREDACAO_MAXIMA;
     }
 
-    public void validarNovoAnimal(int idAquario, Animal novoAnimal){
+    public void validarNovoAnimal(int idAquario, Animal novoAnimal) {
         List<AnimalAquario> animaisAssociados = animalAquarioRepository.findByAquarioId(idAquario);
         List<PlantaAquario> plantasAssociadas = plantaAquarioRepository.findByAquarioId(idAquario);
 
         for (AnimalAquario animalAquario : animaisAssociados) {
             Animal existente = animalAquario.getAnimal();
 
-            if (faixasIncompativeis(existente.getPhMin(), existente.getPhMax(), novoAnimal.getPhMin(), novoAnimal.getPhMax()) || (faixasIncompativeis(existente.getTempMin(), existente.getTempMax(), novoAnimal.getTempMin(), novoAnimal.getTempMax()))) {
-                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": faixas de pH ou temperatura não se sobrepõem.");
+            if (faixasIncompativeis(existente.getPhMin(), existente.getPhMax(), novoAnimal.getPhMin(),
+                    novoAnimal.getPhMax())
+                    || (faixasIncompativeis(existente.getTempMin(), existente.getTempMax(), novoAnimal.getTempMin(),
+                            novoAnimal.getTempMax()))) {
+                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com "
+                        + existente.getNomePopular() + ": faixas de pH ou temperatura não se sobrepõem.");
             }
 
-            if(existente.getGhMin() != null && existente.getGhMax() != null && novoAnimal.getGhMin() != null && novoAnimal.getGhMax() != null && faixasIncompativeis(existente.getGhMin(), existente.getGhMax(), novoAnimal.getGhMin(), novoAnimal.getGhMax())){
-                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": faixa de gH não se sobrepõem.");
+            if (existente.getGhMin() != null && existente.getGhMax() != null && novoAnimal.getGhMin() != null
+                    && novoAnimal.getGhMax() != null && faixasIncompativeis(existente.getGhMin(), existente.getGhMax(),
+                            novoAnimal.getGhMin(), novoAnimal.getGhMax())) {
+                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com "
+                        + existente.getNomePopular() + ": faixa de gH não se sobrepõem.");
             }
 
-            if(existente.getSalinidadeMin() != null && existente.getSalinidadeMax() != null && novoAnimal.getSalinidadeMin() != null && novoAnimal.getSalinidadeMax() != null && faixasIncompativeis(existente.getSalinidadeMin(), existente.getSalinidadeMax(), novoAnimal.getSalinidadeMin(), novoAnimal.getSalinidadeMax())){
-                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": faixa de salinidade não se sobrepõem.");
+            if (existente.getSalinidadeMin() != null && existente.getSalinidadeMax() != null
+                    && novoAnimal.getSalinidadeMin() != null && novoAnimal.getSalinidadeMax() != null
+                    && faixasIncompativeis(existente.getSalinidadeMin(), existente.getSalinidadeMax(),
+                            novoAnimal.getSalinidadeMin(), novoAnimal.getSalinidadeMax())) {
+                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com "
+                        + existente.getNomePopular() + ": faixa de salinidade não se sobrepõem.");
             }
 
-            if(agressividadeIncompativel(existente, novoAnimal)){
-                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": ambos ocupam a mesma região de nado e pelo menos um é agressivo.");
+            if (agressividadeIncompativel(existente, novoAnimal)) {
+                throw new IllegalArgumentException(
+                        novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular()
+                                + ": ambos ocupam a mesma região de nado e pelo menos um é agressivo.");
             }
 
-            if(territorialismoIncompativel(existente, novoAnimal)){
-                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": ambos são territorialistas na mesma região de nado.");
+            if (territorialismoIncompativel(existente, novoAnimal)) {
+                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com "
+                        + existente.getNomePopular() + ": ambos são territorialistas na mesma região de nado.");
             }
 
-            if(riscoPredacao(existente, novoAnimal)){
-                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": diferença de tamanho indica risco de predação.");
+            if (riscoPredacao(existente, novoAnimal)) {
+                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com "
+                        + existente.getNomePopular() + ": diferença de tamanho indica risco de predação.");
             }
         }
 
         for (PlantaAquario plantaAquario : plantasAssociadas) {
             Planta existente = plantaAquario.getPlanta();
 
-            if (faixasIncompativeis(existente.getPhMin(), existente.getPhMax(), novoAnimal.getPhMin(), novoAnimal.getPhMax()) || faixasIncompativeis(existente.getTempMin(), existente.getTempMax(), novoAnimal.getTempMin(), novoAnimal.getTempMax())) {
-                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": faixas de pH ou temperatura não se sobrepõem.");
+            if (faixasIncompativeis(existente.getPhMin(), existente.getPhMax(), novoAnimal.getPhMin(),
+                    novoAnimal.getPhMax())
+                    || faixasIncompativeis(existente.getTempMin(), existente.getTempMax(), novoAnimal.getTempMin(),
+                            novoAnimal.getTempMax())) {
+                throw new IllegalArgumentException(novoAnimal.getNomePopular() + " é incompatível com "
+                        + existente.getNomePopular() + ": faixas de pH ou temperatura não se sobrepõem.");
             }
         }
     }
 
-    public void validarNovaPlanta(int idAquario, Planta novaPlanta){
+    public void validarNovaPlanta(int idAquario, Planta novaPlanta) {
         List<AnimalAquario> animaisAssociados = animalAquarioRepository.findByAquarioId(idAquario);
         List<PlantaAquario> plantasAssociadas = plantaAquarioRepository.findByAquarioId(idAquario);
 
         for (AnimalAquario animalAquario : animaisAssociados) {
             Animal existente = animalAquario.getAnimal();
 
-            if (faixasIncompativeis(existente.getPhMin(), existente.getPhMax(), novaPlanta.getPhMin(), novaPlanta.getPhMax()) || (faixasIncompativeis(existente.getTempMin(), existente.getTempMax(), novaPlanta.getTempMin(), novaPlanta.getTempMax()))) {
-                throw new IllegalArgumentException(novaPlanta.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": faixas de pH ou temperatura não se sobrepõem.");
+            if (faixasIncompativeis(existente.getPhMin(), existente.getPhMax(), novaPlanta.getPhMin(),
+                    novaPlanta.getPhMax())
+                    || (faixasIncompativeis(existente.getTempMin(), existente.getTempMax(), novaPlanta.getTempMin(),
+                            novaPlanta.getTempMax()))) {
+                throw new IllegalArgumentException(novaPlanta.getNomePopular() + " é incompatível com "
+                        + existente.getNomePopular() + ": faixas de pH ou temperatura não se sobrepõem.");
             }
-            
+
         }
 
         for (PlantaAquario plantaAquario : plantasAssociadas) {
             Planta existente = plantaAquario.getPlanta();
 
-            if (faixasIncompativeis(existente.getPhMin(), existente.getPhMax(), novaPlanta.getPhMin(), novaPlanta.getPhMax()) || faixasIncompativeis(existente.getTempMin(), existente.getTempMax(), novaPlanta.getTempMin(), novaPlanta.getTempMax())) {
-                throw new IllegalArgumentException(novaPlanta.getNomePopular() + " é incompatível com " + existente.getNomePopular() + ": faixas de pH ou temperatura não se sobrepõem.");
+            if (faixasIncompativeis(existente.getPhMin(), existente.getPhMax(), novaPlanta.getPhMin(),
+                    novaPlanta.getPhMax())
+                    || faixasIncompativeis(existente.getTempMin(), existente.getTempMax(), novaPlanta.getTempMin(),
+                            novaPlanta.getTempMax())) {
+                throw new IllegalArgumentException(novaPlanta.getNomePopular() + " é incompatível com "
+                        + existente.getNomePopular() + ": faixas de pH ou temperatura não se sobrepõem.");
             }
         }
     }
 
-    public boolean isCompativel(int idAquario, Animal animal){
-        try{
+    public boolean isCompativel(int idAquario, Animal animal) {
+        try {
             validarNovoAnimal(idAquario, animal);
             return true;
-        }catch (IllegalArgumentException e) {
-            return  false;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
 
     }
 
-    public boolean saoCompativeis(Animal a, Animal b){
-    if(faixasIncompativeis(a.getPhMin(), a.getPhMax(), b.getPhMin(), b.getPhMax())){
-        return false;
-    }
-    if(faixasIncompativeis(a.getTempMin(), a.getTempMax(), b.getTempMin(), b.getTempMax())){
-        return false;
-    }
-    if(a.getGhMin() != null && a.getGhMax() != null && b.getGhMin() != null && b.getGhMax() != null && faixasIncompativeis(a.getGhMin(), a.getGhMax(), b.getGhMin(), b.getGhMax())){
-        return false;
-    }   
-    if(a.getSalinidadeMin() != null && a.getSalinidadeMax() != null && b.getSalinidadeMin() != null && b.getSalinidadeMax() != null && faixasIncompativeis(a.getSalinidadeMin(), a.getSalinidadeMax(), b.getSalinidadeMin(), b.getSalinidadeMax())){
-        return false;   
+    public boolean saoCompativeis(Animal a, Animal b) {
+        if (faixasIncompativeis(a.getPhMin(), a.getPhMax(), b.getPhMin(), b.getPhMax())) {
+            return false;
+        }
+        if (faixasIncompativeis(a.getTempMin(), a.getTempMax(), b.getTempMin(), b.getTempMax())) {
+            return false;
+        }
+        if (a.getGhMin() != null && a.getGhMax() != null && b.getGhMin() != null && b.getGhMax() != null
+                && faixasIncompativeis(a.getGhMin(), a.getGhMax(), b.getGhMin(), b.getGhMax())) {
+            return false;
+        }
+        if (a.getSalinidadeMin() != null && a.getSalinidadeMax() != null && b.getSalinidadeMin() != null
+                && b.getSalinidadeMax() != null && faixasIncompativeis(a.getSalinidadeMin(), a.getSalinidadeMax(),
+                        b.getSalinidadeMin(), b.getSalinidadeMax())) {
+            return false;
+        }
+
+        if (agressividadeIncompativel(a, b)) {
+            return false;
+        }
+        if (territorialismoIncompativel(a, b)) {
+            return false;
+        }
+        if (riscoPredacao(a, b)) {
+            return false;
+        }
+        return true;
     }
 
-    if(agressividadeIncompativel(a, b)){
-        return false;
+    public boolean saoCompativeis(Planta planta, Animal animal) {
+        return !faixasIncompativeis(planta.getPhMin(), planta.getPhMax(), animal.getPhMin(), animal.getPhMax())
+                && !faixasIncompativeis(planta.getTempMin(), planta.getTempMax(), animal.getTempMin(),
+                        animal.getTempMax());
     }
-    if(territorialismoIncompativel(a, b)){
-        return false;
+
+    public boolean saoCompativeis(Planta a, Planta b) {
+        return !faixasIncompativeis(a.getPhMin(), a.getPhMax(), b.getPhMin(), b.getPhMax())
+                && !faixasIncompativeis(a.getTempMin(), a.getTempMax(), b.getTempMin(), b.getTempMax());
     }
-    if(riscoPredacao(a, b)){
-        return false;
-    }
-    return true;
-}
 }

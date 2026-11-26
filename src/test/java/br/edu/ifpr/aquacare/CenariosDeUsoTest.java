@@ -88,7 +88,7 @@ class CenariosDeUsoTest {
         analise = new AnaliseParametroService(animalAquarioRepo, toxicidade);
         diagnostico = new DiagnosticoService(registroRepo, animalAquarioRepo, analise, compatibilidade, aquarioServico,
                 plantaAquarioRepo, equipamentoRepo);
-        recomendacao = new RecomendacaoService(animalAquarioRepo, animalRepo, compatibilidade);
+        recomendacao = new RecomendacaoService(animalAquarioRepo, animalRepo, compatibilidade, aquarioServico);
         dimensionamento = new DimensionamentoService();
 
         aquarioDoce = aquario(TipoAgua.DOCE, 100f);
@@ -411,10 +411,14 @@ class CenariosDeUsoTest {
     @Test @Order(41)
     void r2_especiesRecomendadas() {
         Animal residente = pacifico("Residente", 6.0f, 7.5f, 22f, 28f, RegiaoNado.MEIO, 4f);
+        residente.setIdAnimal(1);
         aquarioCom(noAquario(residente, 1));
         Animal ok = pacifico("Candidata 1", 6.5f, 7.5f, 24f, 28f, RegiaoNado.FUNDO, 5f);
+        ok.setIdAnimal(2);
         Animal phRuim = pacifico("Candidata 2", 7.8f, 8.5f, 24f, 28f, RegiaoNado.FUNDO, 5f);
+        phRuim.setIdAnimal(3);
         Animal predador = pacifico("Candidata 3", 6.5f, 7.5f, 24f, 28f, RegiaoNado.FUNDO, 15f);
+        predador.setIdAnimal(4);
         when(animalRepo.findAll()).thenReturn(List.of(ok, phRuim, predador));
         List<Animal> sugeridas = recomendacao.sugerirEspecies(ID_AQUARIO);
         String obtido = String.join(", ", sugeridas.stream().map(Animal::getNomePopular).toList());

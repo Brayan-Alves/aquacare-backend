@@ -143,6 +143,8 @@ public class DiagnosticoService {
             luzAtual = Iluminacao.ALTA;
         }
 
+        List<AnimalAquario> animais = animalAquarioRepository.findByAquarioId(idAquario);
+
         for (PlantaAquario pa : plantas) {
             Planta planta = pa.getPlanta();
 
@@ -158,6 +160,30 @@ public class DiagnosticoService {
                         planta.getNomePopular() + " precisa de injeção de CO2, que não está ativa neste aquário.",
                         Severidade.ATENCAO,
                         "Instale um sistema de injeção de CO2 ou substitua por uma espécie que não dependa dele."));
+            }
+
+            for (AnimalAquario aa : animais) {
+                if (!compatibilidadeService.saoCompativeis(planta, aa.getAnimal())) {
+                    alertas.add(new Alerta(Parametro.COMPATIBILIDADE,
+                            planta.getNomePopular() + " e " + aa.getAnimal().getNomePopular()
+                                    + " não têm faixa de pH ou temperatura em comum.",
+                            Severidade.ATENCAO,
+                            "Mantenha a água na faixa da espécie mais sensível ou substitua a planta por uma compatível."));
+                }
+            }
+        }
+
+        for (int i = 0; i < plantas.size(); i++) {
+            for (int j = i + 1; j < plantas.size(); j++) {
+                Planta a = plantas.get(i).getPlanta();
+                Planta b = plantas.get(j).getPlanta();
+                if (!compatibilidadeService.saoCompativeis(a, b)) {
+                    alertas.add(new Alerta(Parametro.COMPATIBILIDADE,
+                            a.getNomePopular() + " e " + b.getNomePopular()
+                                    + " não têm faixa de pH ou temperatura em comum.",
+                            Severidade.ATENCAO,
+                            "Mantenha a água na faixa da espécie mais sensível ou substitua uma das plantas."));
+                }
             }
         }
 

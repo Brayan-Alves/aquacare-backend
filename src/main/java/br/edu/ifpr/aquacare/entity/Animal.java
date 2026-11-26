@@ -89,5 +89,9 @@ public class Animal {
 
     @Column(nullable = true)
     private Integer quantidadeMinimaGrupo;
+
+    public boolean isDeAguaSalgada(){
+        return salinidadeMin != null && salinidadeMax != null;
+    }
 }
 

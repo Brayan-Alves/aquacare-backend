@@ -13,4 +13,5 @@ public interface PlantaRepository extends JpaRepository<Planta, Integer>{
     List<Planta> findByNomeCientificoContainingIgnoreCase(String nome);
     List<Planta> findByDificuldade(Dificuldade dificuldade);
     List<Planta> findByIluminacao(Iluminacao iluminacao);
+    boolean existsByNomeCientificoIgnoreCase(String nomeCientifico);
 }

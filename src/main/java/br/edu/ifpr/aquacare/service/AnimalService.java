@@ -23,6 +23,9 @@ public class AnimalService {
     }
 
     public Animal cadastrar(Animal animal){
+        if(animalRepository.existsByNomeCientificoIgnoreCase(animal.getNomeCientifico())){
+            throw new IllegalArgumentException("Já existe uma espécie cadastrada com esse nome científico.");
+        }
         return animalRepository.save(animal);
     }
 

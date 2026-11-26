@@ -23,6 +23,9 @@ public class PlantaService {
     }
 
     public Planta cadastrar(Planta planta){
+        if(plantaRepository.existsByNomeCientificoIgnoreCase(planta.getNomeCientifico())){
+            throw new IllegalArgumentException("Já existe uma espécie cadastrada com esse nome científico.");
+        }
         return plantaRepository.save(planta);
     }
 

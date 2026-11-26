@@ -30,7 +30,7 @@ public class AnimalAquarioService {
     public AnimalAquario associar(AnimalAquario animalAquario) {
         Aquario aquario = animalAquario.getAquario();
         Animal animal = animalAquario.getAnimal();
-        boolean animalDeAguaSalgada = animal.getSalinidadeMin() != null && animal.getSalinidadeMax() != null;
+        boolean animalDeAguaSalgada = animal.isDeAguaSalgada();
 
         if (aquario.getTipoAgua() == TipoAgua.MARINHO && !animalDeAguaSalgada) {
             throw new IllegalArgumentException(animal.getNomePopular()
