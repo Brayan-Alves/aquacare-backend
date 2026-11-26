@@ -9,4 +9,5 @@ import br.edu.ifpr.aquacare.entity.PlantaAquario;
 public interface PlantaAquarioRepository extends JpaRepository<PlantaAquario, Integer>{
     
     public List<PlantaAquario> findByAquarioId(int idAquario);
+    boolean existsByPlantaIdPlanta(int idPlanta);
 }

@@ -10,4 +10,5 @@ import br.edu.ifpr.aquacare.entity.AnimalAquario;
 public interface AnimalAquarioRepository extends JpaRepository<AnimalAquario, Integer>{
     public List<AnimalAquario> findByAquarioId(int idAquario);
     Optional<AnimalAquario> findByAquarioIdAndAnimalIdAnimal(int idAquario, int idAnimal);
+    boolean existsByAnimalIdAnimal(int idAnimal);
 }

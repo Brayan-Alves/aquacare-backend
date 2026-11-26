@@ -42,6 +42,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE, "/animal/**", "/planta/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/animal/**", "/planta/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/aquarios/listar-todos").hasRole("ADMIN")
+            .requestMatchers("/error").permitAll()
             .anyRequest().authenticated()
         )
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

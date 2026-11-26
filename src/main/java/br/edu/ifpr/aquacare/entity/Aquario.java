@@ -1,6 +1,7 @@
 package br.edu.ifpr.aquacare.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import br.edu.ifpr.aquacare.enums.NivelPlanta;
 import br.edu.ifpr.aquacare.enums.TipoAgua;
@@ -44,6 +45,21 @@ private boolean isCiclado;
 
 @Column(nullable = false)
 private boolean injecaoCO2;
+
+@OneToMany(mappedBy = "aquario", cascade = CascadeType.REMOVE)
+private List<Equipamento> equipamentos;
+
+@OneToMany(mappedBy = "aquario", cascade = CascadeType.REMOVE)
+private List<AnimalAquario> animais;
+
+@OneToMany(mappedBy = "aquario", cascade = CascadeType.REMOVE)
+private List<PlantaAquario> plantas;
+
+@OneToMany(mappedBy = "aquario", cascade = CascadeType.REMOVE)
+private List<RegistroParametro> registros;
+
+@OneToMany(mappedBy = "aquario", cascade = CascadeType.REMOVE)
+private List<Lembrete> lembretes;
 
 @PrePersist
 public void prePersist(){

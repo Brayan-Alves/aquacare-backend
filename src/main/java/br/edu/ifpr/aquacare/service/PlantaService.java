@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import br.edu.ifpr.aquacare.entity.Planta;
 import br.edu.ifpr.aquacare.enums.Dificuldade;
 import br.edu.ifpr.aquacare.enums.Iluminacao;
+import br.edu.ifpr.aquacare.repository.PlantaAquarioRepository;
 import br.edu.ifpr.aquacare.repository.PlantaRepository;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -14,9 +15,11 @@ import jakarta.persistence.EntityNotFoundException;
 public class PlantaService {
     
     private final PlantaRepository plantaRepository;
+    private final PlantaAquarioRepository plantaAquarioRepository;
 
-    public PlantaService(PlantaRepository plantaRepository){
+    public PlantaService(PlantaRepository plantaRepository, PlantaAquarioRepository plantaAquarioRepository){
         this.plantaRepository = plantaRepository;
+        this.plantaAquarioRepository = plantaAquarioRepository;;
     }
 
     public Planta cadastrar(Planta planta){
@@ -67,6 +70,9 @@ public class PlantaService {
     }
 
     public void excluir(int id){
+        if(plantaAquarioRepository.existsByPlantaIdPlanta(id)){
+            throw new IllegalArgumentException("Esta espécie está associada a aquários e não pode ser excluída.");
+        }
         plantaRepository.delete(buscarPorId(id));
     }
 

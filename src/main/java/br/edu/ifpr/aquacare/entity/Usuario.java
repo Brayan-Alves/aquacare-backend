@@ -48,6 +48,9 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DispositivoNotificacao> dispositivos;
 
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE)
+    private List<PasswordResetToken> tokensRecuperacao;
+
     @PrePersist
     public void prePersist(){
         this.dataCadastro = LocalDateTime.now();
