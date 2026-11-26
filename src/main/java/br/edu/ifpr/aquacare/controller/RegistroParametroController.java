@@ -91,17 +91,7 @@ public class RegistroParametroController {
         registro.setTemperatura(dados.temperatura());
 
         RegistroParametro salvo = registroParametroService.cadastrar(registro);
-        List<Alerta> alertas = analiseParametroService.analisar(salvo);
-
-        for (Alerta a : alertas) {
-            AlertaRegistro entidade = new AlertaRegistro();
-            entidade.setRegistro(salvo);
-            entidade.setParametro(a.parametro());
-            entidade.setMensagem(a.mensagem());
-            entidade.setSeveridade(a.severidade());
-            entidade.setRecomendacao(a.recomendacao());
-            alertaRegistroRepository.save(entidade);
-        }
+        List<Alerta> alertas = analisarESalvarAlertas(salvo);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(alertas);
     }
@@ -114,7 +104,8 @@ public class RegistroParametroController {
         }
         RegistroParametro registro = registroParametroService.buscarPorId(id);
 
-        List<AlertaResponse> alertas = alertaRegistroRepository.findByRegistroIdParametro(registro.getIdParametro()).stream().map(AlertaResponse::from).toList();
+        List<AlertaResponse> alertas = alertaRegistroRepository.findByRegistroIdParametro(registro.getIdParametro())
+                .stream().map(AlertaResponse::from).toList();
         return ResponseEntity.ok(RegistroParametroResponse.from(registro, alertas));
     }
 
@@ -126,12 +117,14 @@ public class RegistroParametroController {
         }
         List<RegistroParametro> registro = registroParametroService.buscarPorIdAquario(id);
 
-        return ResponseEntity.ok(registro.stream().map(r -> RegistroParametroResponse.from(r, alertaRegistroRepository.findByRegistroIdParametro(r.getIdParametro()).stream().map(AlertaResponse::from).toList())).toList()); 
+        return ResponseEntity.ok(registro.stream()
+                .map(r -> RegistroParametroResponse.from(r, alertaRegistroRepository
+                        .findByRegistroIdParametro(r.getIdParametro()).stream().map(AlertaResponse::from).toList()))
+                .toList());
     }
-        
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@PathVariable int id, @RequestBody DadosRequest dados,
+    public ResponseEntity<List<Alerta>> atualizar(@PathVariable int id, @RequestBody DadosRequest dados,
             @AuthenticationPrincipal Usuario usuario) {
         if (!registroParametroService.buscarPorId(id).getAquario().getUsuario().getId().equals(usuario.getId())) {
             throw new AccessDeniedException("Esse registro não pertence a você.");
@@ -150,9 +143,9 @@ public class RegistroParametroController {
         registro.setSalinidade(dados.salinidade());
         registro.setTemperatura(dados.temperatura());
 
-        registroParametroService.atualizar(id, registro);
+        RegistroParametro atualizado = registroParametroService.atualizar(id, registro);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(analisarESalvarAlertas(atualizado));
     }
 
     @DeleteMapping("/{id}")
@@ -163,5 +156,22 @@ public class RegistroParametroController {
         registroParametroService.excluir(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    private List<Alerta> analisarESalvarAlertas(RegistroParametro registro) {
+        alertaRegistroRepository
+                .deleteAll(alertaRegistroRepository.findByRegistroIdParametro(registro.getIdParametro()));
+
+        List<Alerta> alertas = analiseParametroService.analisar(registro);
+        for (Alerta a : alertas) {
+            AlertaRegistro entidade = new AlertaRegistro();
+            entidade.setRegistro(registro);
+            entidade.setParametro(a.parametro());
+            entidade.setMensagem(a.mensagem());
+            entidade.setSeveridade(a.severidade());
+            entidade.setRecomendacao(a.recomendacao());
+            alertaRegistroRepository.save(entidade);
+        }
+        return alertas;
     }
 }

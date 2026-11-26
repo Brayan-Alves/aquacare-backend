@@ -22,6 +22,7 @@ import jakarta.validation.constraints.NotBlank;
 
 import br.edu.ifpr.aquacare.entity.Usuario;
 import br.edu.ifpr.aquacare.service.UsuarioService;
+import br.edu.ifpr.aquacare.security.TokenService;
 import jakarta.validation.Valid;
 
 @RestController 
@@ -29,9 +30,11 @@ import jakarta.validation.Valid;
 public class UsuarioController {
     
     private final UsuarioService usuarioService;
+    private final TokenService tokenService;
 
-    public UsuarioController(UsuarioService usuarioService){
+    public UsuarioController(UsuarioService usuarioService, TokenService tokenService){
         this.usuarioService = usuarioService;
+        this.tokenService = tokenService;
     }
 
     public record UsuarioResponse(String id, String email, String nome, LocalDateTime dataCadastro, Role role){
@@ -81,7 +84,7 @@ public class UsuarioController {
         return ResponseEntity.ok(UsuarioResponse.from(usuario));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(@PathVariable  String id, @Valid @RequestBody AtualizarContaRequest dados, @AuthenticationPrincipal  Usuario usuario){
+    public ResponseEntity<String> atualizar(@PathVariable  String id, @Valid @RequestBody AtualizarContaRequest dados, @AuthenticationPrincipal  Usuario usuario){
 
         if(!usuario.getId().equals(id)){
             throw new AccessDeniedException("Você só pode alterar/excluir sua conta!");
@@ -90,8 +93,8 @@ public class UsuarioController {
         dadosAtualizados.setNome(dados.nome());
         dadosAtualizados.setEmail(dados.email());    
 
-        usuarioService.atualizar(id, dadosAtualizados);
-        return ResponseEntity.ok().build();
+        Usuario atualizado = usuarioService.atualizar(id, dadosAtualizados);
+        return ResponseEntity.ok(tokenService.gerarToken(atualizado.getEmail()));
     }
 
     @DeleteMapping("/{id}")

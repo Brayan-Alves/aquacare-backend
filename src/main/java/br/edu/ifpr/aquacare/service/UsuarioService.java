@@ -51,8 +51,13 @@ public class UsuarioService {
     public Usuario atualizar(String id, Usuario dadosAtualizados){
         Usuario usuario = buscarPorId(id);
 
+        boolean trocouEmail = !usuario.getEmail().equalsIgnoreCase(dadosAtualizados.getEmail());
+        if(trocouEmail && usuarioRepository.findByEmail(dadosAtualizados.getEmail()).isPresent()){
+            throw new IllegalArgumentException("E-mail já cadastrado.");
+        }
         usuario.setNome(dadosAtualizados.getNome());
         usuario.setEmail(dadosAtualizados.getEmail());
+
 
         return usuarioRepository.save(usuario);
     }
