@@ -9,5 +9,7 @@ public enum Parametro {
     MAGNESIO,
     GRUPO,
     COMPATIBILIDADE,
-    CICLAGEM
+    CICLAGEM,
+    ILUMINACAO,
+    CO2
 }

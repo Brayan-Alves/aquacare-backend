@@ -35,6 +35,7 @@ import br.edu.ifpr.aquacare.enums.TipoAgua;
 import br.edu.ifpr.aquacare.enums.TipoEquipamento;
 import br.edu.ifpr.aquacare.repository.AnimalAquarioRepository;
 import br.edu.ifpr.aquacare.repository.AnimalRepository;
+import br.edu.ifpr.aquacare.repository.EquipamentoRepository;
 import br.edu.ifpr.aquacare.repository.PlantaAquarioRepository;
 import br.edu.ifpr.aquacare.repository.RegistroParametroRepository;
 import br.edu.ifpr.aquacare.service.AnaliseParametroService;
@@ -61,6 +62,7 @@ class CenariosDeUsoTest {
     private PlantaAquarioRepository plantaAquarioRepo;
     private RegistroParametroRepository registroRepo;
     private AnimalRepository animalRepo;
+    private EquipamentoRepository equipamentoRepo;
     private AquarioService aquarioServico;
 
     private ToxicidadeService toxicidade;
@@ -78,12 +80,14 @@ class CenariosDeUsoTest {
         plantaAquarioRepo = mock(PlantaAquarioRepository.class);
         registroRepo = mock(RegistroParametroRepository.class);
         animalRepo = mock(AnimalRepository.class);
+        equipamentoRepo = mock(EquipamentoRepository.class);
         aquarioServico = mock(AquarioService.class);
 
         toxicidade = new ToxicidadeService();
         compatibilidade = new CompatibilidadeService(animalAquarioRepo, plantaAquarioRepo);
         analise = new AnaliseParametroService(animalAquarioRepo, toxicidade);
-        diagnostico = new DiagnosticoService(registroRepo, animalAquarioRepo, analise, compatibilidade, aquarioServico);
+        diagnostico = new DiagnosticoService(registroRepo, animalAquarioRepo, analise, compatibilidade, aquarioServico,
+                plantaAquarioRepo, equipamentoRepo);
         recomendacao = new RecomendacaoService(animalAquarioRepo, animalRepo, compatibilidade);
         dimensionamento = new DimensionamentoService();
 
@@ -93,6 +97,7 @@ class CenariosDeUsoTest {
         when(plantaAquarioRepo.findByAquarioId(ID_AQUARIO)).thenReturn(List.of());
         when(animalAquarioRepo.findByAquarioId(ID_AQUARIO)).thenReturn(List.of());
         when(aquarioServico.buscarPorId(ID_AQUARIO)).thenReturn(aquarioDoce);
+        when(equipamentoRepo.findByAquarioId(ID_AQUARIO)).thenReturn(List.of());
     }
 
     // ---------------------------------------------------------------- utilitários

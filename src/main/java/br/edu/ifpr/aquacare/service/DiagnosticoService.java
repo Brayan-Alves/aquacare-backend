@@ -7,14 +7,20 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import br.edu.ifpr.aquacare.entity.Animal;
+import br.edu.ifpr.aquacare.entity.Planta;
 import br.edu.ifpr.aquacare.entity.Aquario;
 import br.edu.ifpr.aquacare.entity.AnimalAquario;
 import br.edu.ifpr.aquacare.entity.RegistroParametro;
+import br.edu.ifpr.aquacare.entity.PlantaAquario;
 import br.edu.ifpr.aquacare.enums.EstadoAquario;
 import br.edu.ifpr.aquacare.enums.Parametro;
 import br.edu.ifpr.aquacare.enums.Severidade;
+import br.edu.ifpr.aquacare.enums.Iluminacao;
+import br.edu.ifpr.aquacare.enums.TipoEquipamento;
 import br.edu.ifpr.aquacare.repository.AnimalAquarioRepository;
 import br.edu.ifpr.aquacare.repository.RegistroParametroRepository;
+import br.edu.ifpr.aquacare.repository.PlantaAquarioRepository;
+import br.edu.ifpr.aquacare.repository.EquipamentoRepository;
 
 @Service
 public class DiagnosticoService {
@@ -24,15 +30,20 @@ public class DiagnosticoService {
     private final AnaliseParametroService analiseParametroService;
     private final CompatibilidadeService compatibilidadeService;
     private final AquarioService aquarioService;
+    private final PlantaAquarioRepository plantaAquarioRepository;
+    private final EquipamentoRepository equipamentoRepository;
 
     public DiagnosticoService(RegistroParametroRepository registroParametroRepository,
             AnimalAquarioRepository animalAquarioRepository, AnaliseParametroService analiseParametroService,
-            CompatibilidadeService compatibilidadeService, AquarioService aquarioService) {
+            CompatibilidadeService compatibilidadeService, AquarioService aquarioService,
+            PlantaAquarioRepository plantaAquarioRepository, EquipamentoRepository equipamentoRepository) {
         this.registroParametroRepository = registroParametroRepository;
         this.animalAquarioRepository = animalAquarioRepository;
         this.analiseParametroService = analiseParametroService;
         this.compatibilidadeService = compatibilidadeService;
         this.aquarioService = aquarioService;
+        this.plantaAquarioRepository = plantaAquarioRepository;
+        this.equipamentoRepository = equipamentoRepository;
     }
 
     public record Diagnostico(EstadoAquario estado, List<Alerta> alertas) {
@@ -50,6 +61,7 @@ public class DiagnosticoService {
         List<Alerta> alertas = new ArrayList<>(analiseParametroService.analisar(registro));
         alertas.addAll(verificarGrupos(idAquario));
         alertas.addAll(verificarCompatibilidade(idAquario));
+        alertas.addAll(verificarPlantas(idAquario, aquario));
 
         int diasMontagem = (int) java.time.temporal.ChronoUnit.DAYS.between(aquario.getDataMontagem(),
                 LocalDateTime.now());
@@ -102,10 +114,53 @@ public class DiagnosticoService {
                 Animal a = associados.get(i).getAnimal();
                 Animal b = associados.get(j).getAnimal();
                 if (a.getIdAnimal() != b.getIdAnimal() && !compatibilidadeService.saoCompativeis(a, b)) {
-                    alertas.add(new Alerta(Parametro.COMPATIBILIDADE, a.getNomePopular() + " pode ser incompatível com " + b.getNomePopular() + ".", Severidade.ATENCAO, "Observe o comportamento dos animais de perto; considere separar as espécies em aquários diferentes se houver sinais de estresse ou agressão."));
+                    alertas.add(new Alerta(Parametro.COMPATIBILIDADE,
+                            a.getNomePopular() + " pode ser incompatível com " + b.getNomePopular() + ".",
+                            Severidade.ATENCAO,
+                            "Observe o comportamento dos animais de perto; considere separar as espécies em aquários diferentes se houver sinais de estresse ou agressão."));
                 }
             }
         }
+        return alertas;
+    }
+
+    private List<Alerta> verificarPlantas(int idAquario, Aquario aquario) {
+        List<Alerta> alertas = new ArrayList<>();
+        List<PlantaAquario> plantas = plantaAquarioRepository.findByAquarioId(idAquario);
+
+        float lumensTotais = (float) equipamentoRepository.findByAquarioId(idAquario).stream()
+                .filter(e -> e.getTipo() == TipoEquipamento.ILUMINACAO)
+                .mapToDouble(e -> e.getLumens() != null ? e.getLumens() : 0f)
+                .sum();
+        float lumensPorLitro = aquario.getLitragem() > 0 ? lumensTotais / aquario.getLitragem() : 0;
+
+        Iluminacao luzAtual;
+        if (lumensPorLitro < 30) {
+            luzAtual = Iluminacao.BAIXA;
+        } else if (lumensPorLitro <= 60) {
+            luzAtual = Iluminacao.MEDIA;
+        } else {
+            luzAtual = Iluminacao.ALTA;
+        }
+
+        for (PlantaAquario pa : plantas) {
+            Planta planta = pa.getPlanta();
+
+            if (luzAtual.ordinal() < planta.getIluminacao().ordinal()) {
+                alertas.add(new Alerta(Parametro.ILUMINACAO,
+                        planta.getNomePopular() + " precisa de mais luz do que o aquário oferece atualmente.",
+                        Severidade.ATENCAO,
+                        "Aumente a potência ou quantidade de luminárias para atender a necessidade dessa planta."));
+            }
+
+            if (planta.isCo2Necessario() && !aquario.isInjecaoCO2()) {
+                alertas.add(new Alerta(Parametro.CO2,
+                        planta.getNomePopular() + " precisa de injeção de CO2, que não está ativa neste aquário.",
+                        Severidade.ATENCAO,
+                        "Instale um sistema de injeção de CO2 ou substitua por uma espécie que não dependa dele."));
+            }
+        }
+
         return alertas;
     }
 }
