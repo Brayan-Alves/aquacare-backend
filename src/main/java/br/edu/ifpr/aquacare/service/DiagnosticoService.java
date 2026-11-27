@@ -3,6 +3,7 @@ package br.edu.ifpr.aquacare.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import br.edu.ifpr.aquacare.repository.AnimalAquarioRepository;
 import br.edu.ifpr.aquacare.repository.RegistroParametroRepository;
 import br.edu.ifpr.aquacare.repository.PlantaAquarioRepository;
 import br.edu.ifpr.aquacare.repository.EquipamentoRepository;
+import br.edu.ifpr.aquacare.service.CompatibilidadeService.Incompatibilidade;
 
 @Service
 public class DiagnosticoService {
@@ -113,11 +115,13 @@ public class DiagnosticoService {
             for (int j = i + 1; j < associados.size(); j++) {
                 Animal a = associados.get(i).getAnimal();
                 Animal b = associados.get(j).getAnimal();
-                if (a.getIdAnimal() != b.getIdAnimal() && !compatibilidadeService.saoCompativeis(a, b)) {
-                    alertas.add(new Alerta(Parametro.COMPATIBILIDADE,
-                            a.getNomePopular() + " pode ser incompatível com " + b.getNomePopular() + ".",
-                            Severidade.ATENCAO,
-                            "Observe o comportamento dos animais de perto; considere separar as espécies em aquários diferentes se houver sinais de estresse ou agressão."));
+                if (a.getIdAnimal() == b.getIdAnimal()) {
+                    continue;
+                }
+                Optional<Incompatibilidade> problema = compatibilidadeService.verificar(a, b);
+                if (problema.isPresent()) {
+                    alertas.add(new Alerta(Parametro.COMPATIBILIDADE, problema.get().mensagem(),
+                            Severidade.ATENCAO, problema.get().recomendacao()));
                 }
             }
         }

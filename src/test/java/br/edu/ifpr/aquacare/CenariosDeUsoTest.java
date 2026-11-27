@@ -29,6 +29,7 @@ import br.edu.ifpr.aquacare.entity.RegistroParametro;
 import br.edu.ifpr.aquacare.enums.Agressividade;
 import br.edu.ifpr.aquacare.enums.EstadoAquario;
 import br.edu.ifpr.aquacare.enums.PadraoTerritorial;
+import br.edu.ifpr.aquacare.enums.Parametro;
 import br.edu.ifpr.aquacare.enums.RegiaoNado;
 import br.edu.ifpr.aquacare.enums.Sensibilidade;
 import br.edu.ifpr.aquacare.enums.TipoAgua;
@@ -38,6 +39,7 @@ import br.edu.ifpr.aquacare.repository.AnimalRepository;
 import br.edu.ifpr.aquacare.repository.EquipamentoRepository;
 import br.edu.ifpr.aquacare.repository.PlantaAquarioRepository;
 import br.edu.ifpr.aquacare.repository.RegistroParametroRepository;
+import br.edu.ifpr.aquacare.service.Alerta;
 import br.edu.ifpr.aquacare.service.AnaliseParametroService;
 import br.edu.ifpr.aquacare.service.AquarioService;
 import br.edu.ifpr.aquacare.service.CompatibilidadeService;
@@ -450,6 +452,23 @@ class CenariosDeUsoTest {
         String r10 = diagnosticarMarinho(420f, 1320f);
         registrar("D10", "Diagnóstico (marinho)", "Ca 420 ppm; Mg 1320 ppm", "SAUDAVEL", r10);
         assertEquals(true, r10.startsWith(EstadoAquario.SAUDAVEL.name()));
+    }
+
+    @Test @Order(26)
+    void d11_alertaDeCompatibilidadeExplicaOMotivo() {
+        Animal pequeno = pacifico("Espécie A", 6.0f, 8.0f, 24f, 30f, RegiaoNado.MEIO, 10.5f);
+        Animal grande = pacifico("Espécie B", 6.0f, 8.0f, 0f, 41f, RegiaoNado.MEIO, 48f);
+        pequeno.setIdAnimal(1);
+        grande.setIdAnimal(2);
+        aquarioCom(noAquario(pequeno, 1), noAquario(grande, 1));
+        String r = diagnosticar(registro(aquarioDoce, 7.0f, 25f, 0.1f, null, null));
+        registrar("D11", "Diagnóstico", "10,5 cm × 48 cm (razão 4,6), mesma faixa de água", "ATENCAO (predação, com o motivo)", r);
+        assertEquals(true, r.startsWith(EstadoAquario.ATENCAO.name())
+                && r.contains("Risco de predação: Espécie B (48 cm) tem 4,6 vezes o tamanho de Espécie A (10,5 cm)"));
+
+        Alerta alerta = diagnostico.diagnosticar(ID_AQUARIO).alertas().stream()
+                .filter(a -> a.parametro() == Parametro.COMPATIBILIDADE).findFirst().orElseThrow();
+        assertEquals(true, alerta.recomendacao().contains("aquários separados"));
     }
 
     // ---------------------------------------------------------------- casos de borda (robustez)
