@@ -33,7 +33,6 @@ public class LembreteService {
         lembrete.setConcluido(dadosAtualizados.isConcluido());
         lembrete.setDataHoraLembrete(dadosAtualizados.getDataHoraLembrete());
         lembrete.setTitulo(dadosAtualizados.getTitulo());
-        lembrete.setNotificado(dadosAtualizados.isNotificado());
         
         return lembreteRepository.save(lembrete);
     }

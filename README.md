@@ -90,7 +90,6 @@ Endpoints publicos (sem necessidade de token): login, cadastro de usuario, recup
 | Animal-Aquario | `/animal-aquario` | Associacao de animais a um aquario |
 | Planta-Aquario | `/planta-aquario` | Associacao de plantas a um aquario |
 | Lembretes | `/lembrete` | Lembretes de manutencao do aquario |
-| Dispositivos de notificacao | `/dispositivo` | Tokens de push notification do usuario |
 
 ## Autores
 

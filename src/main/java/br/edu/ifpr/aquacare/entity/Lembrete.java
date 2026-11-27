@@ -42,7 +42,4 @@ public class Lembrete {
     @Column(nullable = false)
     private boolean isConcluido;
 
-    @Column(nullable = false)
-    private boolean notificado;
-
 }

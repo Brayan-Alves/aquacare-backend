@@ -24,7 +24,6 @@ import br.edu.ifpr.aquacare.entity.AnimalAquario;
 import br.edu.ifpr.aquacare.entity.Aquario;
 import br.edu.ifpr.aquacare.entity.Equipamento;
 import br.edu.ifpr.aquacare.entity.Planta;
-import br.edu.ifpr.aquacare.entity.PlantaAquario;
 import br.edu.ifpr.aquacare.entity.RegistroParametro;
 import br.edu.ifpr.aquacare.enums.Agressividade;
 import br.edu.ifpr.aquacare.enums.EstadoAquario;

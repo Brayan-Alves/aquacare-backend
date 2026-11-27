@@ -29,11 +29,11 @@ public class LembreteController {
     private final LembreteService lembreteService;
     private final AquarioService aquarioService;
 
-    public record DadosRequest(int idAquario, String titulo, LocalDateTime dataHoraLembrete, boolean concluido, boolean notificado){}
+    public record DadosRequest(int idAquario, String titulo, LocalDateTime dataHoraLembrete, boolean concluido){}
 
-    public record LembreteResponse(int idLembrete, int idAquario, String titulo, LocalDateTime dataHoraLembrete, boolean concluido, boolean notificado){
+    public record LembreteResponse(int idLembrete, int idAquario, String titulo, LocalDateTime dataHoraLembrete, boolean concluido){
         public static LembreteResponse from(Lembrete lembrete){
-            return new LembreteResponse(lembrete.getIdLembrete(), lembrete.getAquario().getId(), lembrete.getTitulo(), lembrete.getDataHoraLembrete(), lembrete.isConcluido(), lembrete.isNotificado());
+            return new LembreteResponse(lembrete.getIdLembrete(), lembrete.getAquario().getId(), lembrete.getTitulo(), lembrete.getDataHoraLembrete(), lembrete.isConcluido());
         }
     }
 
@@ -50,7 +50,6 @@ public class LembreteController {
         lembrete.setAquario(aquarioService.buscarPorId(dados.idAquario()));
         lembrete.setConcluido(dados.concluido());
         lembrete.setDataHoraLembrete(dados.dataHoraLembrete());
-        lembrete.setNotificado(dados.notificado());
         lembrete.setTitulo(dados.titulo());
 
         if(!lembrete.getAquario().getUsuario().getId().equals(usuario.getId())){
@@ -101,7 +100,6 @@ public class LembreteController {
 
         lembrete.setConcluido(dados.concluido());
         lembrete.setDataHoraLembrete(dados.dataHoraLembrete());
-        lembrete.setNotificado(dados.notificado());
         lembrete.setTitulo(dados.titulo());
 
         if(!lembreteService.buscarPorId(id).getUsuario().getId().equals(usuario.getId())){

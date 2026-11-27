@@ -45,9 +45,6 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Lembrete> lembretes;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DispositivoNotificacao> dispositivos;
-
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE)
     private List<PasswordResetToken> tokensRecuperacao;
 
